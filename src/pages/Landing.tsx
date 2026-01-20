@@ -26,51 +26,52 @@ export default function Landing() {
 
         {/* Framework Explanation */}
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-loam-brown mb-12 text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold text-loam-brown mb-8 sm:mb-12 text-center">
             The HomeRun Framework
           </h2>
-          <div className="bg-loam-neutral rounded-loam p-8 mb-12 border border-loam-clay/20">
-            <div className="flex items-center justify-center gap-2 md:gap-4 flex-wrap">
+          <div className="bg-loam-neutral rounded-loam p-4 sm:p-6 md:p-8 mb-12 border border-loam-clay/20">
+            {/* Mobile: Vertical Stack | Desktop: Horizontal Flow */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 md:gap-4">
               {/* AT BAT - Brown Circle */}
-              <div className="w-24 h-24 md:w-32 md:h-32 bg-loam-brown rounded-full flex flex-col items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-xs md:text-sm text-center px-2">AT BAT</span>
-                <span className="text-white text-xs opacity-90 mt-1">WHY</span>
+              <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-loam-brown rounded-full flex flex-col items-center justify-center shadow-lg">
+                <span className="text-white font-bold text-[10px] sm:text-xs md:text-sm text-center px-1 sm:px-2">AT BAT</span>
+                <span className="text-white text-[9px] sm:text-xs opacity-90 mt-0.5 sm:mt-1">WHY</span>
               </div>
               
-              {/* Arrow */}
-              <div className="text-loam-clay text-2xl md:text-3xl">›</div>
+              {/* Arrow - Hidden on very small screens, shown on sm+ */}
+              <div className="text-loam-clay text-xl sm:text-2xl md:text-3xl rotate-90 sm:rotate-0">›</div>
               
               {/* 1ST BASE - Green Rounded Rectangle */}
-              <div className="bg-loam-green rounded-loam px-4 py-3 md:px-6 md:py-4 shadow-lg min-w-[100px] md:min-w-[120px] flex flex-col items-center">
-                <span className="text-white font-bold text-sm md:text-base">1ST BASE</span>
-                <span className="text-white text-xs opacity-90 mt-1">WHO</span>
+              <div className="bg-loam-green rounded-loam px-3 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 shadow-lg min-w-[90px] sm:min-w-[100px] md:min-w-[120px] flex flex-col items-center">
+                <span className="text-white font-bold text-xs sm:text-sm md:text-base">1ST BASE</span>
+                <span className="text-white text-[10px] sm:text-xs opacity-90 mt-0.5 sm:mt-1">WHO</span>
               </div>
               
               {/* Arrow */}
-              <div className="text-loam-clay text-2xl md:text-3xl">›</div>
+              <div className="text-loam-clay text-xl sm:text-2xl md:text-3xl rotate-90 sm:rotate-0">›</div>
               
               {/* 2ND BASE - Green Rounded Rectangle */}
-              <div className="bg-loam-green rounded-loam px-4 py-3 md:px-6 md:py-4 shadow-lg min-w-[100px] md:min-w-[120px] flex flex-col items-center">
-                <span className="text-white font-bold text-sm md:text-base">2ND BASE</span>
-                <span className="text-white text-xs opacity-90 mt-1">WHAT</span>
+              <div className="bg-loam-green rounded-loam px-3 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 shadow-lg min-w-[90px] sm:min-w-[100px] md:min-w-[120px] flex flex-col items-center">
+                <span className="text-white font-bold text-xs sm:text-sm md:text-base">2ND BASE</span>
+                <span className="text-white text-[10px] sm:text-xs opacity-90 mt-0.5 sm:mt-1">WHAT</span>
               </div>
               
               {/* Arrow */}
-              <div className="text-loam-clay text-2xl md:text-3xl">›</div>
+              <div className="text-loam-clay text-xl sm:text-2xl md:text-3xl rotate-90 sm:rotate-0">›</div>
               
               {/* 3RD BASE - Green Rounded Rectangle */}
-              <div className="bg-loam-green rounded-loam px-4 py-3 md:px-6 md:py-4 shadow-lg min-w-[100px] md:min-w-[120px] flex flex-col items-center">
-                <span className="text-white font-bold text-sm md:text-base">3RD BASE</span>
-                <span className="text-white text-xs opacity-90 mt-1">HOW</span>
+              <div className="bg-loam-green rounded-loam px-3 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 shadow-lg min-w-[90px] sm:min-w-[100px] md:min-w-[120px] flex flex-col items-center">
+                <span className="text-white font-bold text-xs sm:text-sm md:text-base">3RD BASE</span>
+                <span className="text-white text-[10px] sm:text-xs opacity-90 mt-0.5 sm:mt-1">HOW</span>
               </div>
               
               {/* Arrow */}
-              <div className="text-loam-clay text-2xl md:text-3xl">›</div>
+              <div className="text-loam-clay text-xl sm:text-2xl md:text-3xl rotate-90 sm:rotate-0">›</div>
               
               {/* HOME - Green Diamond */}
-              <div className="bg-loam-green w-20 h-20 md:w-24 md:h-24 transform rotate-45 flex flex-col items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-xs md:text-sm transform -rotate-45 text-center">HOME</span>
-                <span className="text-white text-xs opacity-90 transform -rotate-45 text-center mt-1">MATTERS</span>
+              <div className="bg-loam-green w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 transform rotate-45 flex flex-col items-center justify-center shadow-lg">
+                <span className="text-white font-bold text-[10px] sm:text-xs md:text-sm transform -rotate-45 text-center">HOME</span>
+                <span className="text-white text-[9px] sm:text-xs opacity-90 transform -rotate-45 text-center mt-0.5 sm:mt-1">MATTERS</span>
               </div>
             </div>
           </div>

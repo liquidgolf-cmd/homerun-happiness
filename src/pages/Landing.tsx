@@ -66,10 +66,10 @@ export default function Landing() {
               </div>
               
               {/* Arrow */}
-              <div className="text-loam-clay text-xl sm:text-2xl md:text-3xl rotate-90 sm:rotate-0 mx-3 sm:mx-4 md:mx-6">›</div>
+              <div className="text-loam-clay text-xl sm:text-2xl md:text-3xl rotate-90 sm:rotate-0">›</div>
               
               {/* HOME - Green Diamond */}
-              <div className="bg-loam-green w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 transform rotate-45 flex flex-col items-center justify-center shadow-lg ml-2 sm:ml-0">
+              <div className="bg-loam-green w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 transform rotate-45 flex flex-col items-center justify-center shadow-lg ml-3 sm:ml-4 md:ml-6">
                 <span className="text-white font-bold text-[10px] sm:text-xs md:text-sm transform -rotate-45 text-center leading-tight">HOME</span>
                 <span className="text-white text-[9px] sm:text-xs opacity-90 transform -rotate-45 text-center mt-0.5 sm:mt-1 leading-tight">MATTERS</span>
               </div>

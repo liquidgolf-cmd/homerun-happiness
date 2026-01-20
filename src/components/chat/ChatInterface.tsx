@@ -3,6 +3,8 @@ import { Message } from '@/types/conversation';
 import MessageBubble from './MessageBubble';
 import InputBar from './InputBar';
 import TypingIndicator from './TypingIndicator';
+import { TTSToggle } from './TTSToggle';
+import { useTTS } from '@/contexts/TTSContext';
 
 interface ChatInterfaceProps {
   messages: Message[];
@@ -12,6 +14,8 @@ interface ChatInterfaceProps {
 
 export default function ChatInterface({ messages, loading, onSendMessage }: ChatInterfaceProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { speakText, ttsEnabled } = useTTS();
+  const lastMessageRef = useRef<string>('');
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

@@ -27,10 +27,12 @@ export function detectVagueAnswer(answer: string): VagueResponse {
   }
 
   // Check for intellectualizing (lots of "I think" but no "I feel")
-  const thinkCount = (answer.match(/i think|i believe|i suppose/gi) || []).length;
-  const feelCount = (answer.match(/i feel|i sense|it feels/gi) || []).length;
+  // Only flag if answer is long enough and has significant imbalance
+  const thinkCount = (answer.match(/\bi think\b|\bi believe\b|\bi suppose\b/gi) || []).length;
+  const feelCount = (answer.match(/\bi feel\b|\bi sense\b|\bit feels\b/gi) || []).length;
   
-  if (thinkCount > 2 && feelCount === 0) {
+  // Only flag intellectualizing if answer is substantial and has major imbalance
+  if (answer.split(/\s+/).length > 20 && thinkCount > 3 && feelCount === 0) {
     return {
       is_vague: true,
       reason: 'Too much intellectualizing, not enough feeling',

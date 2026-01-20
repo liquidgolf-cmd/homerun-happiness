@@ -34,7 +34,8 @@ export default function Assessment() {
     try {
       const recommendedPath = calculateRecommendedPath();
       
-      const { error: saveError } = await preAssessments.createPreAssessment({
+      // Try to save assessment, but continue even if it fails
+      await preAssessments.createPreAssessment({
         user_id: user?.id,
         email: user?.email || '',
         happiness_score: happinessScore,
@@ -44,19 +45,16 @@ export default function Assessment() {
         recommended_path: recommendedPath,
       });
 
-      if (saveError) {
-        setError('Failed to save assessment. Please try again.');
-      } else {
-        navigate('/path-selection', {
-          state: {
-            happinessScore,
-            clarityScore,
-            readinessScore,
-            biggestChallenge,
-            recommendedPath,
-          },
-        });
-      }
+      // Always navigate to path selection regardless of save status
+      navigate('/path-selection', {
+        state: {
+          happinessScore,
+          clarityScore,
+          readinessScore,
+          biggestChallenge,
+          recommendedPath,
+        },
+      });
     } catch (err) {
       setError('An unexpected error occurred');
       console.error(err);

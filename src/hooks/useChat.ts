@@ -9,11 +9,53 @@ interface UseChatProps {
   baseStage: BaseStage;
 }
 
+// Detect if AI response indicates conversation completion
+function detectCompletion(response: string, baseStage: BaseStage): boolean {
+  const responseLower = response.toLowerCase();
+  
+  const completionPhrases = [
+    'conversation is complete',
+    'this conversation is complete',
+    'you\'ve discovered your',
+    'this is your root',
+    'ready to move',
+    'ready for the next',
+    'ready to discover',
+    'ready to explore',
+    'ready to map',
+    'ready to see',
+  ];
+  
+  const nextBasePhrases: Record<BaseStage, string[]> = {
+    at_bat: ['first base', 'discover who', 'who you really are'],
+    first_base: ['second base', 'discover what', 'what you want'],
+    second_base: ['third base', 'map how', 'how you\'ll make it happen'],
+    third_base: ['home plate', 'why it matters', 'explore why it matters'],
+    home_plate: ['report', 'complete journey', 'see your complete'],
+    completed: [],
+  };
+  
+  const hasCompletionPhrase = completionPhrases.some(phrase => 
+    responseLower.includes(phrase)
+  );
+  
+  const hasNextBasePhrase = nextBasePhrases[baseStage]?.some(phrase =>
+    responseLower.includes(phrase)
+  );
+  
+  // Also check for explicit completion statements
+  const explicitCompletion = responseLower.includes('complete') && 
+    (responseLower.includes('discovered') || responseLower.includes('root'));
+  
+  return (hasCompletionPhrase && hasNextBasePhrase) || explicitCompletion;
+}
+
 export function useChat({ conversation, baseStage }: UseChatProps) {
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [whyLevel, setWhyLevel] = useState(1);
+  const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
     if (conversation) {
@@ -109,6 +151,9 @@ export function useChat({ conversation, baseStage }: UseChatProps) {
 
       const { response, tokens } = await generateCoachResponse(content, context);
 
+      // Check if AI indicates completion
+      const completionDetected = detectCompletion(response, baseStage);
+      
       // Determine if we should increment why level
       const nextWhyLevel = whyLevel >= 5 ? 5 : whyLevel + 1;
 
@@ -128,6 +173,11 @@ export function useChat({ conversation, baseStage }: UseChatProps) {
       } else if (savedAssistant) {
         setChatMessages(prev => [...prev, savedAssistant]);
         setWhyLevel(nextWhyLevel);
+        
+        // Set completion state if detected
+        if (completionDetected || nextWhyLevel >= 5) {
+          setIsComplete(true);
+        }
       }
     } catch (error) {
       console.error('Error generating response:', error);
@@ -153,6 +203,7 @@ export function useChat({ conversation, baseStage }: UseChatProps) {
     loading,
     loaded,
     whyLevel,
+    isComplete,
     sendMessage,
     reload: loadMessages,
   };

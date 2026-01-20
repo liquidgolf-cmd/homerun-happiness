@@ -13,7 +13,7 @@ import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 export default function SecondBase() {
   const { user } = useAuth();
   const { conversation, loading: convLoading, saveRootInsight, updateBase } = useConversation(user?.id);
-  const { messages, loading: chatLoading, loaded: chatLoaded, whyLevel, sendMessage, reload } = useChat({
+  const { messages, loading: chatLoading, loaded: chatLoaded, whyLevel, isComplete, sendMessage, reload } = useChat({
     conversation,
     baseStage: 'second_base',
   });

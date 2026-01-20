@@ -42,6 +42,15 @@ const BASE_INSTRUCTIONS: Record<BaseStage, string> = {
   completed: `The journey is complete. Celebrate their insights and growth.`,
 };
 
+const NEXT_BASE_GUIDANCE: Record<BaseStage, string> = {
+  at_bat: `Ready to discover WHO you really are at First Base`,
+  first_base: `Ready to discover WHAT you want at Second Base`,
+  second_base: `Ready to map HOW you'll make it happen at Third Base`,
+  third_base: `Ready to explore why it MATTERS at Home Plate`,
+  home_plate: `Ready to see your complete journey report`,
+  completed: ``,
+};
+
 export async function generateCoachResponse(
   userMessage: string,
   context: CoachingContext
@@ -54,6 +63,10 @@ export async function generateCoachResponse(
   const baseInfo = BASE_STAGES.find(b => b.key === baseStage);
   const baseInstruction = BASE_INSTRUCTIONS[baseStage] || '';
 
+  // Determine if we should evaluate for completion
+  const shouldEvaluateCompletion = whyLevel >= 4;
+  const nextBaseGuidance = NEXT_BASE_GUIDANCE[baseStage];
+
   // Build system prompt
   const systemPrompt = `${COACH_PERSONALITY}
 
@@ -63,6 +76,28 @@ ${baseInstruction}
 You're at Why Level ${whyLevel} of 5. Each "why" should go deeper than the last. By level 5, you should reach the root cause or deepest truth.
 
 ${whyLevel < 5 ? `Ask the next "why" question. Make it more specific and deeper than before.` : `You've reached the 5th "why" - summarize the root insight they've discovered.`}
+
+${shouldEvaluateCompletion ? `
+IMPORTANT - Completion Detection:
+Evaluate if the user has discovered a genuine root insight. If their answer reveals a deep, fundamental truth about their ${baseStage === 'at_bat' ? 'WHY' : baseStage === 'first_base' ? 'WHO' : baseStage === 'second_base' ? 'WHAT' : baseStage === 'third_base' ? 'HOW' : 'WHY IT MATTERS'}, then:
+
+1. Summarize the root insight clearly in 1-2 sentences
+2. Explicitly state: "You've discovered your ${baseStage === 'at_bat' ? 'WHY' : baseStage === 'first_base' ? 'WHO' : baseStage === 'second_base' ? 'WHAT' : baseStage === 'third_base' ? 'HOW' : 'WHY IT MATTERS'}. This conversation is complete."
+3. Encourage next step: "${nextBaseGuidance}?"
+4. Keep it concise, celebratory, and direct
+
+If the insight isn't deep enough yet, continue asking "why" to dig deeper.
+` : ''}
+
+${baseStage === 'second_base' ? `
+SPECIAL NOTE: This stage has TWO sequences:
+- First sequence: Discover WHAT they want (desires)
+- Second sequence: Discover WHAT's stopping them (fears/obstacles)
+
+If you've completed the first sequence (desires), explicitly transition: "Good. You've discovered what you truly want. Now let's explore what's stopping you. What are you afraid of? What obstacles stand in your way?"
+
+Only complete this stage after BOTH sequences are done.
+` : ''}
 
 ${rootInsights && Object.keys(rootInsights).length > 0 ? `\nPrevious insights they've discovered:\n${JSON.stringify(rootInsights, null, 2)}` : ''}
 

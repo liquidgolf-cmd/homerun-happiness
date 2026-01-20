@@ -13,7 +13,7 @@ import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 export default function HomePlate() {
   const { user } = useAuth();
   const { conversation, loading: convLoading, saveRootInsight, updateBase } = useConversation(user?.id);
-  const { messages, loading: chatLoading, loaded: chatLoaded, whyLevel, sendMessage, reload } = useChat({
+  const { messages, loading: chatLoading, loaded: chatLoaded, whyLevel, isComplete, sendMessage, reload } = useChat({
     conversation,
     baseStage: 'home_plate',
   });
@@ -48,7 +48,7 @@ What's the ripple effect of this journey? What legacy are you creating? What mak
   }, [conversation, chatLoaded, messages.length, initialMessageSent, reload]);
 
   useEffect(() => {
-    if (whyLevel >= 5 && conversation && !showCompletion) {
+    if ((isComplete || whyLevel >= 5) && conversation && !showCompletion) {
       // Mark why sequence as complete
       baseProgress.updateBaseProgress(conversation.id, 'home_plate', {
         why_sequence_complete: true,
@@ -69,7 +69,7 @@ What's the ripple effect of this journey? What legacy are you creating? What mak
       
       setShowCompletion(true);
     }
-  }, [whyLevel, conversation, messages, showCompletion, saveRootInsight]);
+  }, [isComplete, whyLevel, conversation, messages, showCompletion, saveRootInsight]);
 
   const handleViewReport = async () => {
     if (!conversation || proceeding) return;

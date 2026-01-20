@@ -13,7 +13,7 @@ import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 export default function AtBat() {
   const { user } = useAuth();
   const { conversation, loading: convLoading, saveRootInsight, updateBase } = useConversation(user?.id);
-  const { messages, loading: chatLoading, loaded: chatLoaded, whyLevel, sendMessage, reload } = useChat({
+  const { messages, loading: chatLoading, loaded: chatLoaded, whyLevel, isComplete, sendMessage, reload } = useChat({
     conversation,
     baseStage: 'at_bat',
   });
@@ -48,7 +48,7 @@ Here's my first question: What do you want? Be specific - don't give me generic 
   }, [conversation, chatLoaded, messages.length, initialMessageSent, reload]);
 
   useEffect(() => {
-    if (whyLevel >= 5 && conversation && !showCompletion) {
+    if ((isComplete || whyLevel >= 5) && conversation && !showCompletion) {
       // Mark why sequence as complete
       baseProgress.updateBaseProgress(conversation.id, 'at_bat', {
         why_sequence_complete: true,
@@ -66,7 +66,7 @@ Here's my first question: What do you want? Be specific - don't give me generic 
       
       setShowCompletion(true);
     }
-  }, [whyLevel, conversation, messages, showCompletion, saveRootInsight]);
+  }, [isComplete, whyLevel, conversation, messages, showCompletion, saveRootInsight]);
 
   const handleProceedToFirstBase = async () => {
     if (!conversation || proceeding) return;

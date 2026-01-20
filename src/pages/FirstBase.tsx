@@ -13,7 +13,7 @@ import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 export default function FirstBase() {
   const { user } = useAuth();
   const { conversation, loading: convLoading, saveRootInsight, updateBase } = useConversation(user?.id);
-  const { messages, loading: chatLoading, whyLevel, sendMessage } = useChat({
+  const { messages, loading: chatLoading, whyLevel, isComplete, sendMessage } = useChat({
     conversation,
     baseStage: 'first_base',
   });
@@ -22,7 +22,7 @@ export default function FirstBase() {
   const [proceeding, setProceeding] = useState(false);
 
   useEffect(() => {
-    if (whyLevel >= 5 && conversation && !showCompletion) {
+    if ((isComplete || whyLevel >= 5) && conversation && !showCompletion) {
       // Mark why sequence as complete
       baseProgress.updateBaseProgress(conversation.id, 'first_base', {
         why_sequence_complete: true,
@@ -40,7 +40,7 @@ export default function FirstBase() {
       
       setShowCompletion(true);
     }
-  }, [whyLevel, conversation, messages, showCompletion, saveRootInsight]);
+  }, [isComplete, whyLevel, conversation, messages, showCompletion, saveRootInsight]);
 
   const handleProceedToSecondBase = async () => {
     if (!conversation || proceeding) return;

@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-sans antialiased bg-white text-gray-900;
+  }
+}
+
+@layer components {
+  .typing-indicator {
+    display: inline-flex;
+    gap: 0.25rem;
+  }
+
+  .typing-indicator span {
+    @apply w-2 h-2 bg-gray-400 rounded-full;
+    animation: typing 1.4s infinite;
+  }
+
+  .typing-indicator span:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+
+  .typing-indicator span:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in;
+  }
+}
+
+@keyframes typing {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.7;
+  }
+  30% {
+    transform: translateY(-10px);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -16,6 +16,8 @@ export default function ChatInterface({ messages, loading, onSendMessage }: Chat
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { speakText, ttsEnabled } = useTTS();
   const lastMessageRef = useRef<string>('');
+  const lastMessageIdRef = useRef<string>('');
+  const isInitialLoadRef = useRef<boolean>(true);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -25,17 +27,41 @@ export default function ChatInterface({ messages, loading, onSendMessage }: Chat
     scrollToBottom();
   }, [messages, loading]);
 
-  // Auto-speak coach messages
+  // Reset tracking when messages array changes significantly (new base stage)
   useEffect(() => {
-    if (messages.length > 0 && ttsEnabled) {
+    if (messages.length === 0) {
+      // Reset refs when starting fresh on a new base
+      lastMessageRef.current = '';
+      lastMessageIdRef.current = '';
+      isInitialLoadRef.current = true;
+    }
+  }, [messages.length]);
+
+  // Auto-speak coach messages - only for NEW messages, not loaded ones
+  useEffect(() => {
+    if (messages.length > 0 && ttsEnabled && !loading) {
       const lastMessage = messages[messages.length - 1];
-      // Only speak assistant messages that are new
-      if (lastMessage.role === 'assistant' && lastMessage.content !== lastMessageRef.current) {
+      
+      // Skip auto-speak on initial load (when messages are loaded from database)
+      if (isInitialLoadRef.current) {
+        // Mark that we've processed initial load
+        isInitialLoadRef.current = false;
         lastMessageRef.current = lastMessage.content;
+        lastMessageIdRef.current = lastMessage.id;
+        return;
+      }
+      
+      // Only speak assistant messages that are truly new (different ID or content)
+      if (
+        lastMessage.role === 'assistant' && 
+        (lastMessage.id !== lastMessageIdRef.current || lastMessage.content !== lastMessageRef.current)
+      ) {
+        lastMessageRef.current = lastMessage.content;
+        lastMessageIdRef.current = lastMessage.id;
         speakText(lastMessage.content);
       }
     }
-  }, [messages, ttsEnabled, speakText]);
+  }, [messages, ttsEnabled, loading, speakText]);
 
   return (
     <div className="flex flex-col h-full max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">

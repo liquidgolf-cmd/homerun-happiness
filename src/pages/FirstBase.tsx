@@ -6,20 +6,46 @@ import { useChat } from '@/hooks/useChat';
 import ChatInterface from '@/components/chat/ChatInterface';
 import ProgressBar from '@/components/progress/ProgressBar';
 import WhyCounter from '@/components/progress/WhyCounter';
-import { baseProgress } from '@/lib/supabase';
+import { baseProgress, messages as messagesApi } from '@/lib/supabase';
 import { downloadConversationPDF } from '@/utils/pdfExport';
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 
 export default function FirstBase() {
   const { user } = useAuth();
   const { conversation, loading: convLoading, saveRootInsight, updateBase } = useConversation(user?.id);
-  const { messages, loading: chatLoading, whyLevel, isComplete, sendMessage } = useChat({
+  const { messages, loading: chatLoading, loaded: chatLoaded, whyLevel, isComplete, sendMessage, reload } = useChat({
     conversation,
     baseStage: 'first_base',
   });
   const navigate = useNavigate();
   const [showCompletion, setShowCompletion] = useState(false);
   const [proceeding, setProceeding] = useState(false);
+  const [initialMessageSent, setInitialMessageSent] = useState(false);
+
+  // Send initial message when conversation starts (only if no existing messages)
+  useEffect(() => {
+    if (conversation && chatLoaded && messages.length === 0 && !initialMessageSent) {
+      setInitialMessageSent(true);
+      
+      const sendInitialMessage = async () => {
+        const initialMsg = `You've discovered your WHY. Now let's discover WHO you really are.
+
+Who are you at your core? Not your job title, not your roles, not what others see - who are YOU when you strip away all the labels?`;
+
+        await messagesApi.addMessage({
+          conversation_id: conversation.id,
+          role: 'assistant',
+          content: initialMsg,
+          base_stage: 'first_base',
+          why_level: 1,
+        });
+        
+        reload();
+      };
+      
+      sendInitialMessage();
+    }
+  }, [conversation, chatLoaded, messages.length, initialMessageSent, reload]);
 
   useEffect(() => {
     if ((isComplete || whyLevel >= 5) && conversation && !showCompletion) {

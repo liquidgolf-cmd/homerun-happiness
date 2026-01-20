@@ -66,7 +66,7 @@ export default function Landing() {
               </div>
               
               {/* Arrow */}
-              <div className="text-loam-clay text-xl sm:text-2xl md:text-3xl rotate-90 sm:rotate-0 my-2 sm:my-0"></div>
+              <div className="text-loam-clay text-xl sm:text-2xl md:text-3xl rotate-90 sm:rotate-0 my-2 sm:my-0">›</div>
               
               {/* HOME - Green Diamond */}
               <div className="bg-loam-green w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 transform rotate-45 flex flex-col items-center justify-center shadow-lg mt-3 sm:mt-0 sm:ml-4 md:ml-6">

@@ -32,13 +32,13 @@ export default function InputBar({ onSend, disabled = false }: InputBarProps) {
           onKeyDown={handleKeyDown}
           disabled={disabled}
           placeholder="Type your answer... (Enter to send, Shift+Enter for new line)"
-          className="flex-1 min-h-[60px] max-h-[200px] px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-homerun-blue focus:border-transparent resize-none transition disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 min-h-[60px] max-h-[200px] px-4 py-3 border border-gray-300 rounded-loam focus:ring-2 focus:ring-loam-brown focus:border-transparent resize-none transition disabled:opacity-50 disabled:cursor-not-allowed"
           rows={2}
         />
         <button
           type="submit"
           disabled={disabled || !message.trim()}
-          className="px-6 py-3 bg-homerun-blue text-white rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-homerun-blue focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition whitespace-nowrap"
+          className="px-6 py-3 bg-loam-green text-white rounded-loam font-medium hover:bg-loam-green/90 focus:outline-none focus:ring-2 focus:ring-loam-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition whitespace-nowrap"
         >
           Send
         </button>

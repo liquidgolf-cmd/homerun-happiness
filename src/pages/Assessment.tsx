@@ -64,7 +64,7 @@ export default function Assessment() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 px-4 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-loam-neutral to-loam-neutral px-4 py-12">
       <div className="max-w-2xl mx-auto">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
@@ -81,7 +81,7 @@ export default function Assessment() {
                 <label className="text-lg font-semibold text-gray-900">
                   On a scale of 1-10, how happy are you right now?
                 </label>
-                <span className="text-2xl font-bold text-homerun-blue">{happinessScore}</span>
+                <span className="text-2xl font-bold text-loam-brown">{happinessScore}</span>
               </div>
               <input
                 type="range"
@@ -89,7 +89,7 @@ export default function Assessment() {
                 max="10"
                 value={happinessScore}
                 onChange={(e) => setHappinessScore(parseInt(e.target.value))}
-                className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-homerun-blue"
+                className="w-full h-3 bg-gray-200 rounded-loam appearance-none cursor-pointer accent-loam-brown"
               />
               <div className="flex justify-between text-xs text-gray-500 mt-1">
                 <span>Not happy</span>
@@ -103,7 +103,7 @@ export default function Assessment() {
                 <label className="text-lg font-semibold text-gray-900">
                   How clear are you on your goals?
                 </label>
-                <span className="text-2xl font-bold text-homerun-blue">{clarityScore}</span>
+                <span className="text-2xl font-bold text-loam-brown">{clarityScore}</span>
               </div>
               <input
                 type="range"
@@ -111,7 +111,7 @@ export default function Assessment() {
                 max="10"
                 value={clarityScore}
                 onChange={(e) => setClarityScore(parseInt(e.target.value))}
-                className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-homerun-blue"
+                className="w-full h-3 bg-gray-200 rounded-loam appearance-none cursor-pointer accent-loam-brown"
               />
               <div className="flex justify-between text-xs text-gray-500 mt-1">
                 <span>Unclear</span>
@@ -125,7 +125,7 @@ export default function Assessment() {
                 <label className="text-lg font-semibold text-gray-900">
                   How ready are you to make changes?
                 </label>
-                <span className="text-2xl font-bold text-homerun-blue">{readinessScore}</span>
+                <span className="text-2xl font-bold text-loam-brown">{readinessScore}</span>
               </div>
               <input
                 type="range"
@@ -133,7 +133,7 @@ export default function Assessment() {
                 max="10"
                 value={readinessScore}
                 onChange={(e) => setReadinessScore(parseInt(e.target.value))}
-                className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-homerun-blue"
+                className="w-full h-3 bg-gray-200 rounded-loam appearance-none cursor-pointer accent-loam-brown"
               />
               <div className="flex justify-between text-xs text-gray-500 mt-1">
                 <span>Not ready</span>
@@ -150,7 +150,7 @@ export default function Assessment() {
                 id="challenge"
                 value={biggestChallenge}
                 onChange={(e) => setBiggestChallenge(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-homerun-blue focus:border-transparent resize-none"
+                className="w-full px-4 py-3 border border-gray-300 rounded-loam focus:ring-2 focus:ring-loam-brown focus:border-transparent resize-none"
                 rows={5}
                 placeholder="Tell us what's holding you back or what you're struggling with most..."
                 required
@@ -158,7 +158,7 @@ export default function Assessment() {
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-loam text-sm">
                 {error}
               </div>
             )}
@@ -166,7 +166,7 @@ export default function Assessment() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-homerun-blue text-white py-4 px-6 rounded-lg text-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-homerun-blue focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="w-full bg-loam-brown text-white py-4 px-6 rounded-loam text-lg font-semibold hover:bg-loam-brown/90 focus:outline-none focus:ring-2 focus:ring-loam-brown focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
               {loading ? 'Saving...' : 'Continue to Path Selection'}
             </button>

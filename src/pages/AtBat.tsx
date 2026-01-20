@@ -93,7 +93,7 @@ Here's my first question: What do you want? Be specific - don't give me generic 
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-homerun-blue"></div>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-loam-brown"></div>
           <p className="mt-4 text-gray-600">Loading your conversation...</p>
         </div>
       </div>
@@ -107,7 +107,7 @@ Here's my first question: What do you want? Be specific - don't give me generic 
           <p className="text-gray-600 mb-4">No active conversation found.</p>
           <button
             onClick={() => navigate('/path-selection')}
-            className="bg-homerun-blue text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+            className="bg-loam-brown text-white px-6 py-3 rounded-loam hover:bg-loam-brown/90 transition"
           >
             Start New Journey
           </button>
@@ -117,7 +117,7 @@ Here's my first question: What do you want? Be specific - don't give me generic 
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 px-4 py-8">
+    <div className="min-h-screen bg-loam-neutral px-4 py-8">
       <div className="max-w-6xl mx-auto">
         <ProgressBar currentBase="at_bat" />
         <WhyCounter currentLevel={whyLevel} />
@@ -127,7 +127,7 @@ Here's my first question: What do you want? Be specific - don't give me generic 
           <div className="flex justify-end mb-4">
             <button
               onClick={() => downloadConversationPDF(messages, 'At Bat - Discovering WHY', conversation || undefined)}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-loam transition"
             >
               <ArrowDownTrayIcon className="w-5 h-5" />
               Download Conversation
@@ -144,9 +144,9 @@ Here's my first question: What do you want? Be specific - don't give me generic 
         </div>
 
         {showCompletion && (
-          <div className="mt-6 bg-white rounded-lg shadow-lg p-8 border-2 border-homerun-green">
+          <div className="mt-6 bg-white rounded-loam shadow-lg p-8 border-2 border-loam-green">
             <div className="text-center">
-              <div className="w-16 h-16 bg-homerun-green rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4">
+              <div className="w-16 h-16 bg-loam-green rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4">
                 ✓
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -158,7 +158,7 @@ Here's my first question: What do you want? Be specific - don't give me generic 
               <button
                 onClick={handleProceedToFirstBase}
                 disabled={proceeding}
-                className="bg-homerun-green text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-homerun-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                className="bg-loam-green text-white px-8 py-4 rounded-loam text-lg font-semibold hover:bg-loam-green/90 focus:outline-none focus:ring-2 focus:ring-loam-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 {proceeding ? 'Moving to First Base...' : 'Proceed to First Base'}
               </button>

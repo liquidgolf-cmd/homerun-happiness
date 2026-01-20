@@ -43,19 +43,19 @@ export default function PathSelection() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 px-4 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-loam-neutral to-loam-neutral px-4 py-12">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Choose Your Path</h1>
           <p className="text-gray-600">
-            Based on your assessment, we recommend the <strong className="text-homerun-blue">
+            Based on your assessment, we recommend the <strong className="text-loam-brown">
               {recommendedPath === 'business' ? 'Business Journey' : 'Personal Life Journey'}
             </strong>
           </p>
         </div>
 
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-loam text-sm">
             {error}
           </div>
         )}
@@ -65,7 +65,7 @@ export default function PathSelection() {
           <div
             className={`bg-white rounded-2xl shadow-lg p-8 border-2 cursor-pointer transition-all ${
               selectedPath === 'business'
-                ? 'border-homerun-blue ring-4 ring-blue-200 ring-opacity-50'
+                ? 'border-loam-brown ring-4 ring-blue-200 ring-opacity-50'
                 : 'border-gray-200 hover:border-gray-300 hover:shadow-xl'
             } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             onClick={() => !loading && handlePathSelect('business')}
@@ -74,7 +74,7 @@ export default function PathSelection() {
               <div
                 className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4 ${
                   selectedPath === 'business'
-                    ? 'bg-homerun-blue text-white'
+                    ? 'bg-loam-brown text-white'
                     : 'bg-gray-200 text-gray-600'
                 }`}
               >
@@ -87,19 +87,19 @@ export default function PathSelection() {
             </div>
             <div className="space-y-3">
               <div className="flex items-start gap-3">
-                <div className="text-homerun-blue text-xl">✓</div>
+                <div className="text-loam-brown text-xl">✓</div>
                 <p className="text-sm text-gray-700">
                   Find your authentic leadership style
                 </p>
               </div>
               <div className="flex items-start gap-3">
-                <div className="text-homerun-blue text-xl">✓</div>
+                <div className="text-loam-brown text-xl">✓</div>
                 <p className="text-sm text-gray-700">
                   Discover your core business values
                 </p>
               </div>
               <div className="flex items-start gap-3">
-                <div className="text-homerun-blue text-xl">✓</div>
+                <div className="text-loam-brown text-xl">✓</div>
                 <p className="text-sm text-gray-700">
                   Build a career aligned with purpose
                 </p>
@@ -111,7 +111,7 @@ export default function PathSelection() {
           <div
             className={`bg-white rounded-2xl shadow-lg p-8 border-2 cursor-pointer transition-all ${
               selectedPath === 'personal'
-                ? 'border-homerun-blue ring-4 ring-blue-200 ring-opacity-50'
+                ? 'border-loam-brown ring-4 ring-blue-200 ring-opacity-50'
                 : 'border-gray-200 hover:border-gray-300 hover:shadow-xl'
             } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             onClick={() => !loading && handlePathSelect('personal')}
@@ -120,7 +120,7 @@ export default function PathSelection() {
               <div
                 className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4 ${
                   selectedPath === 'personal'
-                    ? 'bg-homerun-blue text-white'
+                    ? 'bg-loam-brown text-white'
                     : 'bg-gray-200 text-gray-600'
                 }`}
               >
@@ -133,19 +133,19 @@ export default function PathSelection() {
             </div>
             <div className="space-y-3">
               <div className="flex items-start gap-3">
-                <div className="text-homerun-blue text-xl">✓</div>
+                <div className="text-loam-brown text-xl">✓</div>
                 <p className="text-sm text-gray-700">
                   Understand your authentic self
                 </p>
               </div>
               <div className="flex items-start gap-3">
-                <div className="text-homerun-blue text-xl">✓</div>
+                <div className="text-loam-brown text-xl">✓</div>
                 <p className="text-sm text-gray-700">
                   Discover your deepest values
                 </p>
               </div>
               <div className="flex items-start gap-3">
-                <div className="text-homerun-blue text-xl">✓</div>
+                <div className="text-loam-brown text-xl">✓</div>
                 <p className="text-sm text-gray-700">
                   Build a life that truly fulfills you
                 </p>
@@ -156,7 +156,7 @@ export default function PathSelection() {
 
         {loading && (
           <div className="text-center mt-6">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-homerun-blue"></div>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-loam-brown"></div>
             <p className="mt-2 text-gray-600">Starting your journey...</p>
           </div>
         )}

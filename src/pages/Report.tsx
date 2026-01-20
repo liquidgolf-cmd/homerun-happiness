@@ -47,7 +47,7 @@ export default function Report() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-homerun-blue"></div>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-loam-brown"></div>
           <p className="mt-4 text-gray-600">Loading your report...</p>
         </div>
       </div>
@@ -61,7 +61,7 @@ export default function Report() {
           <p className="text-gray-600 mb-4">No conversation found.</p>
           <button
             onClick={() => navigate('/path-selection')}
-            className="bg-homerun-blue text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+            className="bg-loam-brown text-white px-6 py-3 rounded-loam hover:bg-loam-brown/90 transition"
           >
             Start New Journey
           </button>
@@ -71,7 +71,7 @@ export default function Report() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 px-4 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-loam-neutral to-loam-neutral px-4 py-12">
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
           <div className="text-center mb-8">
@@ -84,7 +84,7 @@ export default function Report() {
 
         <div className="space-y-6">
           {/* Journey Progress Visual */}
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-loam shadow-md p-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">Your HomeRun Journey</h2>
             <div className="flex items-center justify-center">
               <div className="relative">
@@ -94,15 +94,15 @@ export default function Report() {
                   <polygon
                     points="150,50 250,150 150,250 50,150"
                     fill="none"
-                    stroke={conversation.root_why ? '#10b981' : '#e5e7eb'}
+                    stroke={conversation.root_why ? '#5A7247' : '#E8DCC4'}
                     strokeWidth="3"
                   />
                   {/* Bases */}
-                  <circle cx="150" cy="50" r="15" fill={conversation.root_why ? '#2563eb' : '#d1d5db'} />
-                  <circle cx="250" cy="150" r="15" fill={conversation.root_identity ? '#10b981' : '#d1d5db'} />
-                  <circle cx="150" cy="250" r="15" fill={conversation.root_desire && conversation.root_fear ? '#10b981' : '#d1d5db'} />
-                  <circle cx="50" cy="150" r="15" fill={conversation.root_obstacle ? '#10b981' : '#d1d5db'} />
-                  <circle cx="150" cy="150" r="20" fill={conversation.root_legacy ? '#10b981' : '#d1d5db'} />
+                  <circle cx="150" cy="50" r="15" fill={conversation.root_why ? '#4A3728' : '#d1d5db'} />
+                  <circle cx="250" cy="150" r="15" fill={conversation.root_identity ? '#5A7247' : '#d1d5db'} />
+                  <circle cx="150" cy="250" r="15" fill={conversation.root_desire && conversation.root_fear ? '#5A7247' : '#d1d5db'} />
+                  <circle cx="50" cy="150" r="15" fill={conversation.root_obstacle ? '#5A7247' : '#d1d5db'} />
+                  <circle cx="150" cy="150" r="20" fill={conversation.root_legacy ? '#5A7247' : '#d1d5db'} />
                   {/* Labels */}
                   <text x="150" y="35" textAnchor="middle" className="text-xs font-semibold fill-gray-700">At Bat</text>
                   <text x="270" y="155" textAnchor="middle" className="text-xs font-semibold fill-gray-700">First</text>
@@ -116,7 +116,7 @@ export default function Report() {
 
           {/* Root WHY */}
           {conversation.root_why && (
-            <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-homerun-blue">
+            <div className="bg-white rounded-loam shadow-md p-6 border-l-4 border-loam-brown">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-2xl">🏠</span>
                 <h2 className="text-2xl font-bold text-gray-900">Your WHY</h2>
@@ -128,7 +128,7 @@ export default function Report() {
 
           {/* Root Identity */}
           {conversation.root_identity && (
-            <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-homerun-green">
+            <div className="bg-white rounded-loam shadow-md p-6 border-l-4 border-loam-green">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-2xl">👤</span>
                 <h2 className="text-2xl font-bold text-gray-900">Your WHO</h2>
@@ -140,7 +140,7 @@ export default function Report() {
 
           {/* Root Desire */}
           {conversation.root_desire && (
-            <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-500">
+            <div className="bg-white rounded-loam shadow-md p-6 border-l-4 border-yellow-500">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-2xl">💫</span>
                 <h2 className="text-2xl font-bold text-gray-900">Your WHAT - Desires</h2>
@@ -152,7 +152,7 @@ export default function Report() {
 
           {/* Root Fear */}
           {conversation.root_fear && (
-            <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-500">
+            <div className="bg-white rounded-loam shadow-md p-6 border-l-4 border-red-500">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-2xl">⚠️</span>
                 <h2 className="text-2xl font-bold text-gray-900">Your WHAT - Fears & Obstacles</h2>
@@ -164,7 +164,7 @@ export default function Report() {
 
           {/* Root Obstacle */}
           {conversation.root_obstacle && (
-            <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
+            <div className="bg-white rounded-loam shadow-md p-6 border-l-4 border-loam-clay">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-2xl">🛤️</span>
                 <h2 className="text-2xl font-bold text-gray-900">Your HOW</h2>
@@ -176,7 +176,7 @@ export default function Report() {
 
           {/* Root Legacy */}
           {conversation.root_legacy && (
-            <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-indigo-500">
+            <div className="bg-white rounded-loam shadow-md p-6 border-l-4 border-loam-base">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-2xl">🌟</span>
                 <h2 className="text-2xl font-bold text-gray-900">Your Legacy</h2>
@@ -188,7 +188,7 @@ export default function Report() {
 
           {/* Root Sustainability */}
           {conversation.root_sustainability_threat && (
-            <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-teal-500">
+            <div className="bg-white rounded-loam shadow-md p-6 border-l-4 border-loam-highlight">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-2xl">♻️</span>
                 <h2 className="text-2xl font-bold text-gray-900">Sustainability & Long-term Impact</h2>
@@ -199,7 +199,7 @@ export default function Report() {
           )}
 
           {/* Journey Info */}
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-loam shadow-md p-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Journey Details</h2>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
@@ -231,7 +231,7 @@ export default function Report() {
 
           {/* Download Full Journey */}
           {allMessages.length > 0 && (
-            <div className="bg-white rounded-lg shadow-md p-6 text-center">
+            <div className="bg-white rounded-loam shadow-md p-6 text-center">
               <h2 className="text-xl font-bold text-gray-900 mb-3">Download Your Complete Journey</h2>
               <p className="text-gray-600 mb-4">
                 Get a PDF with all your conversations, insights, and progress
@@ -239,7 +239,7 @@ export default function Report() {
               <button
                 onClick={handleDownloadJourney}
                 disabled={loadingMessages}
-                className="inline-flex items-center gap-2 bg-homerun-blue text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50"
+                className="inline-flex items-center gap-2 bg-loam-brown text-white px-6 py-3 rounded-loam font-semibold hover:bg-loam-brown/90 transition disabled:opacity-50"
               >
                 <ArrowDownTrayIcon className="w-5 h-5" />
                 Download Complete Journey
@@ -248,7 +248,7 @@ export default function Report() {
           )}
 
           {/* Next Steps */}
-          <div className="bg-gradient-to-r from-homerun-blue to-homerun-green rounded-lg shadow-lg p-8 text-white text-center">
+          <div className="bg-gradient-to-r from-loam-brown to-loam-green rounded-loam shadow-lg p-8 text-white text-center">
             <h2 className="text-2xl font-bold mb-4">
               {conversation.current_base === 'completed' 
                 ? '🎉 Journey Complete! 🎉' 
@@ -265,7 +265,7 @@ export default function Report() {
                   {conversation.current_base === 'at_bat' && (
                     <button
                       onClick={() => navigate('/first-base')}
-                      className="bg-white text-homerun-blue px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
+                      className="bg-white text-loam-brown px-6 py-3 rounded-loam font-semibold hover:bg-gray-100 transition"
                     >
                       Continue to First Base
                     </button>
@@ -273,7 +273,7 @@ export default function Report() {
                   {conversation.current_base === 'first_base' && (
                     <button
                       onClick={() => navigate('/second-base')}
-                      className="bg-white text-homerun-blue px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
+                      className="bg-white text-loam-brown px-6 py-3 rounded-loam font-semibold hover:bg-gray-100 transition"
                     >
                       Continue to Second Base
                     </button>
@@ -281,7 +281,7 @@ export default function Report() {
                   {conversation.current_base === 'second_base' && (
                     <button
                       onClick={() => navigate('/third-base')}
-                      className="bg-white text-homerun-blue px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
+                      className="bg-white text-loam-brown px-6 py-3 rounded-loam font-semibold hover:bg-gray-100 transition"
                     >
                       Continue to Third Base
                     </button>
@@ -289,7 +289,7 @@ export default function Report() {
                   {conversation.current_base === 'third_base' && (
                     <button
                       onClick={() => navigate('/home-plate')}
-                      className="bg-white text-homerun-blue px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
+                      className="bg-white text-loam-brown px-6 py-3 rounded-loam font-semibold hover:bg-gray-100 transition"
                     >
                       Continue to Home Plate
                     </button>
@@ -298,7 +298,7 @@ export default function Report() {
               )}
               <button
                 onClick={() => navigate('/path-selection')}
-                className="bg-white/20 text-white px-6 py-3 rounded-lg font-semibold hover:bg-white/30 transition border border-white/30"
+                className="bg-white/20 text-white px-6 py-3 rounded-loam font-semibold hover:bg-white/30 transition border border-white/30"
               >
                 Start New Journey
               </button>

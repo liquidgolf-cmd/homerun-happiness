@@ -40,7 +40,7 @@ export default function ChatInterface({ messages, loading, onSendMessage }: Chat
   return (
     <div className="flex flex-col h-full max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
       {/* Header with TTS Toggle */}
-      <div className="bg-gradient-to-r from-homerun-blue to-blue-600 px-4 py-3 flex justify-between items-center">
+      <div className="bg-loam-brown px-4 py-3 flex justify-between items-center">
         <h3 className="text-white font-semibold">Conversation</h3>
         <TTSToggle />
       </div>

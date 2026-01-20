@@ -8,10 +8,10 @@ export function TTSToggle() {
     <button
       onClick={toggleTTS}
       className={`
-        relative inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium
+        relative inline-flex items-center gap-2 px-4 py-2 rounded-loam font-medium
         transition-all duration-200 shadow-sm hover:shadow-md
         ${ttsEnabled 
-          ? 'bg-homerun-green hover:bg-green-600 text-white' 
+          ? 'bg-loam-green hover:bg-loam-green/90 text-white' 
           : 'bg-gray-300 hover:bg-gray-400 text-gray-700'
         }
       `}

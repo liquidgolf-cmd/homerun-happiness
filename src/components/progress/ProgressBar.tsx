@@ -21,11 +21,11 @@ export default function ProgressBar({ currentBase }: ProgressBarProps) {
       <div className="mb-4">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-lg font-semibold text-gray-900">Your Journey</h3>
-          <span className="text-sm font-medium text-homerun-blue">{progressPercentage}%</span>
+          <span className="text-sm font-medium text-loam-brown">{progressPercentage}%</span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
+        <div className="w-full bg-loam-neutral rounded-full h-2">
           <div
-            className="bg-gradient-to-r from-homerun-blue to-homerun-green h-2 rounded-full transition-all duration-500"
+            className="bg-gradient-to-r from-loam-brown to-loam-green h-2 rounded-full transition-all duration-500"
             style={{ width: `${progressPercentage}%` }}
           ></div>
         </div>
@@ -39,21 +39,21 @@ export default function ProgressBar({ currentBase }: ProgressBarProps) {
           return (
             <div
               key={stage.key}
-              className={`relative p-4 rounded-lg border-2 transition-all ${
+              className={`relative p-4 rounded-loam border-2 transition-all ${
                 isCurrent
-                  ? 'border-homerun-blue bg-blue-50 ring-4 ring-blue-200 ring-opacity-50'
+                  ? 'border-loam-brown bg-loam-neutral ring-4 ring-loam-brown ring-opacity-20'
                   : isCompleted
-                  ? 'border-homerun-green bg-green-50'
-                  : 'border-gray-200 bg-gray-50'
+                  ? 'border-loam-green bg-loam-highlight bg-opacity-10'
+                  : 'border-gray-200 bg-loam-neutral bg-opacity-30'
               }`}
             >
               <div className="flex items-center justify-between mb-2">
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
                     isCompleted
-                      ? 'bg-homerun-green text-white'
+                      ? 'bg-loam-green text-white'
                       : isCurrent
-                      ? 'bg-homerun-blue text-white'
+                      ? 'bg-loam-brown text-white'
                       : 'bg-gray-300 text-gray-600'
                   }`}
                 >
@@ -64,13 +64,13 @@ export default function ProgressBar({ currentBase }: ProgressBarProps) {
                   )}
                 </div>
                 {isCurrent && (
-                  <div className="w-2 h-2 bg-homerun-blue rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-loam-brown rounded-full animate-pulse"></div>
                 )}
               </div>
               <div>
                 <h4
                   className={`text-sm font-semibold mb-1 ${
-                    isCurrent ? 'text-homerun-blue' : isCompleted ? 'text-gray-900' : 'text-gray-500'
+                    isCurrent ? 'text-loam-brown' : isCompleted ? 'text-loam-charcoal' : 'text-gray-500'
                   }`}
                 >
                   {stage.label}

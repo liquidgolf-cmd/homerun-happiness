@@ -14,10 +14,10 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
       className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4 animate-fade-in`}
     >
       <div
-        className={`max-w-[80%] md:max-w-[70%] rounded-2xl px-4 py-3 ${
+        className={`max-w-[80%] md:max-w-[70%] rounded-loam px-4 py-3 ${
           isUser
-            ? 'bg-homerun-blue text-white'
-            : 'bg-gray-100 text-gray-900'
+            ? 'bg-loam-brown text-white'
+            : 'bg-loam-neutral text-loam-charcoal'
         }`}
       >
         {isAssistant && message.why_level && (

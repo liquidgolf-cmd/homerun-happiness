@@ -34,16 +34,16 @@ export default function WhyCounter({ currentLevel }: WhyCounterProps) {
               <div
                 className={`w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-all ${
                   isCompleted
-                    ? 'bg-homerun-blue text-white shadow-md'
+                    ? 'bg-loam-brown text-white shadow-md'
                     : 'bg-gray-200 text-gray-500'
                 } ${
-                  isCurrent ? 'ring-4 ring-homerun-blue ring-opacity-30 scale-110' : ''
+                  isCurrent ? 'ring-4 ring-loam-brown ring-opacity-30 scale-110' : ''
                 }`}
               >
                 {level}
               </div>
               {isCurrent && (
-                <div className="mt-2 w-2 h-2 bg-homerun-blue rounded-full animate-pulse"></div>
+                <div className="mt-2 w-2 h-2 bg-loam-brown rounded-full animate-pulse"></div>
               )}
             </div>
           );

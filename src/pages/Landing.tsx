@@ -25,26 +25,65 @@ export default function Landing() {
         </div>
 
         {/* Framework Explanation */}
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
             The HomeRun Framework
           </h2>
-          <div className="grid md:grid-cols-5 gap-6 mb-12">
+          <div className="bg-amber-50 rounded-2xl p-8 mb-12">
+            <div className="flex items-center justify-center gap-2 md:gap-4 flex-wrap">
+              {/* AT BAT - Brown Circle */}
+              <div className="w-24 h-24 md:w-32 md:h-32 bg-amber-800 rounded-full flex items-center justify-center shadow-lg">
+                <span className="text-white font-bold text-sm md:text-base text-center px-2">AT BAT</span>
+              </div>
+              
+              {/* Arrow */}
+              <div className="text-gray-400 text-2xl md:text-3xl">›</div>
+              
+              {/* 1ST BASE - Teal Rounded Rectangle */}
+              <div className="bg-teal-600 rounded-lg px-4 py-3 md:px-6 md:py-4 shadow-lg min-w-[100px] md:min-w-[120px]">
+                <span className="text-white font-bold text-sm md:text-base">1ST BASE</span>
+              </div>
+              
+              {/* Arrow */}
+              <div className="text-gray-400 text-2xl md:text-3xl">›</div>
+              
+              {/* 2ND BASE - Teal Rounded Rectangle */}
+              <div className="bg-teal-600 rounded-lg px-4 py-3 md:px-6 md:py-4 shadow-lg min-w-[100px] md:min-w-[120px]">
+                <span className="text-white font-bold text-sm md:text-base">2ND BASE</span>
+              </div>
+              
+              {/* Arrow */}
+              <div className="text-gray-400 text-2xl md:text-3xl">›</div>
+              
+              {/* 3RD BASE - Teal Rounded Rectangle */}
+              <div className="bg-teal-600 rounded-lg px-4 py-3 md:px-6 md:py-4 shadow-lg min-w-[100px] md:min-w-[120px]">
+                <span className="text-white font-bold text-sm md:text-base">3RD BASE</span>
+              </div>
+              
+              {/* Arrow */}
+              <div className="text-gray-400 text-2xl md:text-3xl">›</div>
+              
+              {/* HOME - Teal Diamond */}
+              <div className="bg-teal-600 w-20 h-20 md:w-24 md:h-24 transform rotate-45 flex items-center justify-center shadow-lg">
+                <span className="text-white font-bold text-xs md:text-sm transform -rotate-45 text-center">HOME</span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Stage Descriptions */}
+          <div className="grid md:grid-cols-5 gap-4 mb-12">
             {[
               { label: 'At Bat', desc: 'Discover WHY' },
               { label: 'First Base', desc: 'Discover WHO' },
               { label: 'Second Base', desc: 'Discover WHAT' },
               { label: 'Third Base', desc: 'Map HOW' },
               { label: 'Home Plate', desc: 'Why it MATTERS' },
-            ].map((stage, index) => (
+            ].map((stage) => (
               <div
                 key={stage.label}
-                className="bg-white rounded-lg p-6 shadow-md text-center border border-gray-200"
+                className="text-center"
               >
-                <div className="w-12 h-12 bg-homerun-blue text-white rounded-full flex items-center justify-center font-bold text-xl mx-auto mb-3">
-                  {index + 1}
-                </div>
-                <h3 className="font-semibold text-gray-900 mb-2">{stage.label}</h3>
+                <h3 className="font-semibold text-gray-900 mb-1">{stage.label}</h3>
                 <p className="text-sm text-gray-600">{stage.desc}</p>
               </div>
             ))}

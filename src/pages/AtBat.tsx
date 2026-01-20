@@ -7,6 +7,8 @@ import ChatInterface from '@/components/chat/ChatInterface';
 import ProgressBar from '@/components/progress/ProgressBar';
 import WhyCounter from '@/components/progress/WhyCounter';
 import { baseProgress, messages as messagesApi } from '@/lib/supabase';
+import { downloadConversationPDF } from '@/utils/pdfExport';
+import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 
 export default function AtBat() {
   const { user } = useAuth();
@@ -119,6 +121,19 @@ Here's my first question: What do you want? Be specific - don't give me generic 
       <div className="max-w-6xl mx-auto">
         <ProgressBar currentBase="at_bat" />
         <WhyCounter currentLevel={whyLevel} />
+        
+        {/* Download Button */}
+        {messages.length > 0 && (
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={() => downloadConversationPDF(messages, 'At Bat - Discovering WHY', conversation || undefined)}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition"
+            >
+              <ArrowDownTrayIcon className="w-5 h-5" />
+              Download Conversation
+            </button>
+          </div>
+        )}
         
         <div className="mt-6">
           <ChatInterface

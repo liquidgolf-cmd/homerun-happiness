@@ -38,9 +38,28 @@ export function useConversation(userId: string | undefined) {
 
     setLoading(true);
     setError(null);
+    
+    // First, check if there's already an active conversation
+    const { data: existing } = await conversations.getActiveConversation(userId);
+    
+    if (existing) {
+      // Reuse existing conversation
+      setConversation(existing);
+      setLoading(false);
+      return { data: existing, error: null };
+    }
+    
+    // If no existing conversation, create a new one
     const { data, error } = await conversations.createConversation(userId, journeyType);
     
     if (error) {
+      // If creation fails, try to get any conversation as fallback
+      const { data: fallback } = await conversations.getActiveConversation(userId);
+      if (fallback) {
+        setConversation(fallback);
+        setLoading(false);
+        return { data: fallback, error: null };
+      }
       setError(error);
       setLoading(false);
       return { error };

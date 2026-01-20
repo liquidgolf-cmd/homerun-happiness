@@ -6,18 +6,44 @@ import { useChat } from '@/hooks/useChat';
 import ChatInterface from '@/components/chat/ChatInterface';
 import ProgressBar from '@/components/progress/ProgressBar';
 import WhyCounter from '@/components/progress/WhyCounter';
-import { baseProgress } from '@/lib/supabase';
+import { baseProgress, messages as messagesApi } from '@/lib/supabase';
 
 export default function AtBat() {
   const { user } = useAuth();
   const { conversation, loading: convLoading, saveRootInsight, updateBase } = useConversation(user?.id);
-  const { messages, loading: chatLoading, whyLevel, sendMessage } = useChat({
+  const { messages, loading: chatLoading, whyLevel, sendMessage, reload } = useChat({
     conversation,
     baseStage: 'at_bat',
   });
   const navigate = useNavigate();
   const [showCompletion, setShowCompletion] = useState(false);
   const [proceeding, setProceeding] = useState(false);
+  const [initialMessageSent, setInitialMessageSent] = useState(false);
+
+  // Send initial message when conversation starts
+  useEffect(() => {
+    if (conversation && messages.length === 0 && !initialMessageSent && !chatLoading) {
+      setInitialMessageSent(true);
+      
+      const sendInitialMessage = async () => {
+        const initialMsg = `Alright, let's cut to the chase. We're here to discover your deepest WHY - the real reason behind what you do. Not the bullshit you tell yourself, but the truth.
+
+So here's my first question: What do you want? And don't give me some generic "I want to be happy" crap. What do you ACTUALLY want?`;
+
+        await messagesApi.addMessage({
+          conversation_id: conversation.id,
+          role: 'assistant',
+          content: initialMsg,
+          base_stage: 'at_bat',
+          why_level: 1,
+        });
+        
+        reload();
+      };
+      
+      sendInitialMessage();
+    }
+  }, [conversation, messages.length, initialMessageSent, chatLoading, reload]);
 
   useEffect(() => {
     if (whyLevel >= 5 && conversation && !showCompletion) {

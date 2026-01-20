@@ -6,58 +6,88 @@ import { useChat } from '@/hooks/useChat';
 import ChatInterface from '@/components/chat/ChatInterface';
 import ProgressBar from '@/components/progress/ProgressBar';
 import WhyCounter from '@/components/progress/WhyCounter';
-import { baseProgress } from '@/lib/supabase';
+import { baseProgress, messages as messagesApi } from '@/lib/supabase';
 import { downloadConversationPDF } from '@/utils/pdfExport';
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 
-export default function FirstBase() {
+export default function ThirdBase() {
   const { user } = useAuth();
   const { conversation, loading: convLoading, saveRootInsight, updateBase } = useConversation(user?.id);
-  const { messages, loading: chatLoading, whyLevel, sendMessage } = useChat({
+  const { messages, loading: chatLoading, loaded: chatLoaded, whyLevel, sendMessage, reload } = useChat({
     conversation,
-    baseStage: 'first_base',
+    baseStage: 'third_base',
   });
   const navigate = useNavigate();
   const [showCompletion, setShowCompletion] = useState(false);
   const [proceeding, setProceeding] = useState(false);
+  const [initialMessageSent, setInitialMessageSent] = useState(false);
+
+  // Send initial message when conversation starts (only if no existing messages)
+  useEffect(() => {
+    if (conversation && chatLoaded && messages.length === 0 && !initialMessageSent) {
+      setInitialMessageSent(true);
+      
+      const sendInitialMessage = async () => {
+        const whyText = conversation.root_why ? `Your WHY: ${conversation.root_why.substring(0, 100)}...` : '';
+        const whoText = conversation.root_identity ? `Your WHO: ${conversation.root_identity.substring(0, 100)}...` : '';
+        const whatText = conversation.root_desire ? `Your WHAT: ${conversation.root_desire.substring(0, 100)}...` : '';
+        
+        const initialMsg = `You've discovered your WHY, WHO, and WHAT. Now let's map out HOW you'll actually make it happen.
+
+${whyText ? `${whyText}\n\n` : ''}${whoText ? `${whoText}\n\n` : ''}${whatText ? `${whatText}\n\n` : ''}With all of this in mind, let's create a sustainable action plan. What obstacles stand in your way? What's stopping you from moving forward right now?`;
+
+        await messagesApi.addMessage({
+          conversation_id: conversation.id,
+          role: 'assistant',
+          content: initialMsg,
+          base_stage: 'third_base',
+          why_level: 1,
+        });
+        
+        reload();
+      };
+      
+      sendInitialMessage();
+    }
+  }, [conversation, chatLoaded, messages.length, initialMessageSent, reload]);
 
   useEffect(() => {
     if (whyLevel >= 5 && conversation && !showCompletion) {
       // Mark why sequence as complete
-      baseProgress.updateBaseProgress(conversation.id, 'first_base', {
+      baseProgress.updateBaseProgress(conversation.id, 'third_base', {
         why_sequence_complete: true,
       });
       
-      // Extract root insight from last assistant message
+      // Extract root obstacle from last assistant message
       const lastAssistantMessage = messages
         .filter(m => m.role === 'assistant')
         .pop();
       
       if (lastAssistantMessage?.content) {
-        // Save root identity
-        saveRootInsight('root_identity', lastAssistantMessage.content);
+        // Save root obstacle
+        saveRootInsight('root_obstacle', lastAssistantMessage.content);
       }
       
       setShowCompletion(true);
     }
   }, [whyLevel, conversation, messages, showCompletion, saveRootInsight]);
 
-  const handleProceedToSecondBase = async () => {
+  const handleProceedToHomePlate = async () => {
     if (!conversation || proceeding) return;
 
     setProceeding(true);
     try {
       // Update base progress
-      await baseProgress.updateBaseProgress(conversation.id, 'first_base', {
+      await baseProgress.updateBaseProgress(conversation.id, 'third_base', {
         completed_at: new Date().toISOString(),
       });
 
       // Update conversation base
-      await updateBase('second_base');
+      await updateBase('home_plate');
       
-      navigate('/second-base');
+      navigate('/home-plate');
     } catch (error) {
-      console.error('Error proceeding to second base:', error);
+      console.error('Error proceeding to home plate:', error);
     } finally {
       setProceeding(false);
     }
@@ -93,14 +123,14 @@ export default function FirstBase() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 px-4 py-8">
       <div className="max-w-6xl mx-auto">
-        <ProgressBar currentBase="first_base" />
+        <ProgressBar currentBase="third_base" />
         <WhyCounter currentLevel={whyLevel} />
         
         {/* Download Button */}
         {messages.length > 0 && (
           <div className="flex justify-end mb-4">
             <button
-              onClick={() => downloadConversationPDF(messages, 'First Base - Discovering WHO', conversation || undefined)}
+              onClick={() => downloadConversationPDF(messages, 'Third Base - Mapping HOW', conversation || undefined)}
               className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition"
             >
               <ArrowDownTrayIcon className="w-5 h-5" />
@@ -124,17 +154,17 @@ export default function FirstBase() {
                 ✓
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                You've Discovered WHO You Really Are!
+                You've Mapped Out HOW to Make It Happen!
               </h2>
               <p className="text-gray-600 mb-6">
-                You've completed the 5 Whys and discovered your authentic identity. Ready to move to Second Base and discover WHAT you truly want and what's stopping you?
+                You've completed the 5 Whys and discovered the obstacles in your way. Ready to move to Home Plate and explore why it MATTERS?
               </p>
               <button
-                onClick={handleProceedToSecondBase}
+                onClick={handleProceedToHomePlate}
                 disabled={proceeding}
                 className="bg-homerun-green text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-homerun-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
-                {proceeding ? 'Moving to Second Base...' : 'Proceed to Second Base'}
+                {proceeding ? 'Moving to Home Plate...' : 'Proceed to Home Plate'}
               </button>
             </div>
           </div>

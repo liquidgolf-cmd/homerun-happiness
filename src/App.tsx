@@ -8,6 +8,9 @@ import Assessment from '@/pages/Assessment';
 import PathSelection from '@/pages/PathSelection';
 import AtBat from '@/pages/AtBat';
 import FirstBase from '@/pages/FirstBase';
+import SecondBase from '@/pages/SecondBase';
+import ThirdBase from '@/pages/ThirdBase';
+import HomePlate from '@/pages/HomePlate';
 import Report from '@/pages/Report';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -68,6 +71,30 @@ function App() {
           element={
             <ProtectedRoute>
               <FirstBase />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/second-base"
+          element={
+            <ProtectedRoute>
+              <SecondBase />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/third-base"
+          element={
+            <ProtectedRoute>
+              <ThirdBase />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/home-plate"
+          element={
+            <ProtectedRoute>
+              <HomePlate />
             </ProtectedRoute>
           }
         />

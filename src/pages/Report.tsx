@@ -83,10 +83,45 @@ export default function Report() {
         </div>
 
         <div className="space-y-6">
+          {/* Journey Progress Visual */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">Your HomeRun Journey</h2>
+            <div className="flex items-center justify-center">
+              <div className="relative">
+                {/* Baseball Diamond */}
+                <svg width="300" height="300" viewBox="0 0 300 300" className="mx-auto">
+                  {/* Diamond outline */}
+                  <polygon
+                    points="150,50 250,150 150,250 50,150"
+                    fill="none"
+                    stroke={conversation.root_why ? '#10b981' : '#e5e7eb'}
+                    strokeWidth="3"
+                  />
+                  {/* Bases */}
+                  <circle cx="150" cy="50" r="15" fill={conversation.root_why ? '#2563eb' : '#d1d5db'} />
+                  <circle cx="250" cy="150" r="15" fill={conversation.root_identity ? '#10b981' : '#d1d5db'} />
+                  <circle cx="150" cy="250" r="15" fill={conversation.root_desire && conversation.root_fear ? '#10b981' : '#d1d5db'} />
+                  <circle cx="50" cy="150" r="15" fill={conversation.root_obstacle ? '#10b981' : '#d1d5db'} />
+                  <circle cx="150" cy="150" r="20" fill={conversation.root_legacy ? '#10b981' : '#d1d5db'} />
+                  {/* Labels */}
+                  <text x="150" y="35" textAnchor="middle" className="text-xs font-semibold fill-gray-700">At Bat</text>
+                  <text x="270" y="155" textAnchor="middle" className="text-xs font-semibold fill-gray-700">First</text>
+                  <text x="150" y="275" textAnchor="middle" className="text-xs font-semibold fill-gray-700">Second</text>
+                  <text x="30" y="155" textAnchor="middle" className="text-xs font-semibold fill-gray-700">Third</text>
+                  <text x="150" y="150" textAnchor="middle" className="text-xs font-semibold fill-white">Home</text>
+                </svg>
+              </div>
+            </div>
+          </div>
+
           {/* Root WHY */}
           {conversation.root_why && (
             <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-homerun-blue">
-              <h2 className="text-2xl font-bold text-gray-900 mb-3">Your WHY</h2>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">🏠</span>
+                <h2 className="text-2xl font-bold text-gray-900">Your WHY</h2>
+                <span className="text-sm text-gray-500">(At Bat)</span>
+              </div>
               <p className="text-gray-700 whitespace-pre-wrap">{conversation.root_why}</p>
             </div>
           )}
@@ -94,8 +129,72 @@ export default function Report() {
           {/* Root Identity */}
           {conversation.root_identity && (
             <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-homerun-green">
-              <h2 className="text-2xl font-bold text-gray-900 mb-3">Your Identity</h2>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">👤</span>
+                <h2 className="text-2xl font-bold text-gray-900">Your WHO</h2>
+                <span className="text-sm text-gray-500">(First Base)</span>
+              </div>
               <p className="text-gray-700 whitespace-pre-wrap">{conversation.root_identity}</p>
+            </div>
+          )}
+
+          {/* Root Desire */}
+          {conversation.root_desire && (
+            <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-500">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">💫</span>
+                <h2 className="text-2xl font-bold text-gray-900">Your WHAT - Desires</h2>
+                <span className="text-sm text-gray-500">(Second Base)</span>
+              </div>
+              <p className="text-gray-700 whitespace-pre-wrap">{conversation.root_desire}</p>
+            </div>
+          )}
+
+          {/* Root Fear */}
+          {conversation.root_fear && (
+            <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-500">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">⚠️</span>
+                <h2 className="text-2xl font-bold text-gray-900">Your WHAT - Fears & Obstacles</h2>
+                <span className="text-sm text-gray-500">(Second Base)</span>
+              </div>
+              <p className="text-gray-700 whitespace-pre-wrap">{conversation.root_fear}</p>
+            </div>
+          )}
+
+          {/* Root Obstacle */}
+          {conversation.root_obstacle && (
+            <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">🛤️</span>
+                <h2 className="text-2xl font-bold text-gray-900">Your HOW</h2>
+                <span className="text-sm text-gray-500">(Third Base)</span>
+              </div>
+              <p className="text-gray-700 whitespace-pre-wrap">{conversation.root_obstacle}</p>
+            </div>
+          )}
+
+          {/* Root Legacy */}
+          {conversation.root_legacy && (
+            <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-indigo-500">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">🌟</span>
+                <h2 className="text-2xl font-bold text-gray-900">Your Legacy</h2>
+                <span className="text-sm text-gray-500">(Home Plate)</span>
+              </div>
+              <p className="text-gray-700 whitespace-pre-wrap">{conversation.root_legacy}</p>
+            </div>
+          )}
+
+          {/* Root Sustainability */}
+          {conversation.root_sustainability_threat && (
+            <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-teal-500">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">♻️</span>
+                <h2 className="text-2xl font-bold text-gray-900">Sustainability & Long-term Impact</h2>
+                <span className="text-sm text-gray-500">(Home Plate)</span>
+              </div>
+              <p className="text-gray-700 whitespace-pre-wrap">{conversation.root_sustainability_threat}</p>
             </div>
           )}
 
@@ -150,17 +249,53 @@ export default function Report() {
 
           {/* Next Steps */}
           <div className="bg-gradient-to-r from-homerun-blue to-homerun-green rounded-lg shadow-lg p-8 text-white text-center">
-            <h2 className="text-2xl font-bold mb-4">Continue Your Journey</h2>
+            <h2 className="text-2xl font-bold mb-4">
+              {conversation.current_base === 'completed' 
+                ? '🎉 Journey Complete! 🎉' 
+                : 'Continue Your Journey'}
+            </h2>
             <p className="mb-6 opacity-90">
-              You've made great progress! Continue to discover more about yourself and build a clear path forward.
+              {conversation.current_base === 'completed'
+                ? 'You\'ve completed the full HomeRun to Happiness journey! You now have a complete understanding of your WHY, WHO, WHAT, HOW, and why it MATTERS.'
+                : 'You\'ve made great progress! Continue to discover more about yourself and build a clear path forward.'}
             </p>
-            <div className="flex gap-4 justify-center">
-              <button
-                onClick={() => navigate('/first-base')}
-                className="bg-white text-homerun-blue px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
-              >
-                Continue Journey
-              </button>
+            <div className="flex gap-4 justify-center flex-wrap">
+              {conversation.current_base !== 'completed' && (
+                <>
+                  {conversation.current_base === 'at_bat' && (
+                    <button
+                      onClick={() => navigate('/first-base')}
+                      className="bg-white text-homerun-blue px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
+                    >
+                      Continue to First Base
+                    </button>
+                  )}
+                  {conversation.current_base === 'first_base' && (
+                    <button
+                      onClick={() => navigate('/second-base')}
+                      className="bg-white text-homerun-blue px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
+                    >
+                      Continue to Second Base
+                    </button>
+                  )}
+                  {conversation.current_base === 'second_base' && (
+                    <button
+                      onClick={() => navigate('/third-base')}
+                      className="bg-white text-homerun-blue px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
+                    >
+                      Continue to Third Base
+                    </button>
+                  )}
+                  {conversation.current_base === 'third_base' && (
+                    <button
+                      onClick={() => navigate('/home-plate')}
+                      className="bg-white text-homerun-blue px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
+                    >
+                      Continue to Home Plate
+                    </button>
+                  )}
+                </>
+              )}
               <button
                 onClick={() => navigate('/path-selection')}
                 className="bg-white/20 text-white px-6 py-3 rounded-lg font-semibold hover:bg-white/30 transition border border-white/30"

@@ -30,7 +30,7 @@ export default function HomePlate() {
       const sendInitialMessage = async () => {
         const initialMsg = `You've discovered your WHY, WHO, WHAT, and HOW. This is incredible progress. Now let's explore why it MATTERS.
 
-What's the ripple effect of this journey? What legacy are you creating? What makes this sustainable for the long term? Let's dig deep into why this truly matters.`;
+Here's my question: Why does this journey truly matter? Not just to you - what's the ripple effect? What legacy are you creating? What makes this sustainable for the long term?`;
 
         await messagesApi.addMessage({
           conversation_id: conversation.id,

@@ -34,7 +34,7 @@ export default function ThirdBase() {
         
         const initialMsg = `You've discovered your WHY, WHO, and WHAT. Now let's map out HOW you'll actually make it happen.
 
-${whyText ? `${whyText}\n\n` : ''}${whoText ? `${whoText}\n\n` : ''}${whatText ? `${whatText}\n\n` : ''}With all of this in mind, let's create a sustainable action plan. What obstacles stand in your way? What's stopping you from moving forward right now?`;
+${whyText ? `${whyText}\n\n` : ''}${whoText ? `${whoText}\n\n` : ''}${whatText ? `${whatText}\n\n` : ''}Here's my question: What's the biggest obstacle standing between you and what you want? Not the surface-level excuse - what's REALLY stopping you from moving forward right now?`;
 
         await messagesApi.addMessage({
           conversation_id: conversation.id,

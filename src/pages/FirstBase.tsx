@@ -30,7 +30,7 @@ export default function FirstBase() {
       const sendInitialMessage = async () => {
         const initialMsg = `You've discovered your WHY. Now let's discover WHO you really are.
 
-Who are you at your core? Not your job title, not your roles, not what others see - who are YOU when you strip away all the labels?`;
+Here's my question: When you strip away your job title, your roles, and what others expect of you - who are you at your core? What makes you uniquely YOU? Be specific. Don't give me labels or roles.`;
 
         await messagesApi.addMessage({
           conversation_id: conversation.id,

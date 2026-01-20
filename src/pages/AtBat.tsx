@@ -26,9 +26,9 @@ export default function AtBat() {
       setInitialMessageSent(true);
       
       const sendInitialMessage = async () => {
-        const initialMsg = `Alright, let's cut to the chase. We're here to discover your deepest WHY - the real reason behind what you do. Not the bullshit you tell yourself, but the truth.
+        const initialMsg = `Let's get started. We're here to discover your deepest WHY - the real reason behind what you do. Not surface-level answers, but the truth.
 
-So here's my first question: What do you want? And don't give me some generic "I want to be happy" crap. What do you ACTUALLY want?`;
+Here's my first question: What do you want? Be specific - don't give me generic answers like "I want to be happy." What do you ACTUALLY want?`;
 
         await messagesApi.addMessage({
           conversation_id: conversation.id,

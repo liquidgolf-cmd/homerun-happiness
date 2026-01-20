@@ -42,10 +42,20 @@ export default function ChatInterface({ messages, loading, onSendMessage }: Chat
     if (messages.length > 0 && ttsEnabled && !loading) {
       const lastMessage = messages[messages.length - 1];
       
-      // Skip auto-speak on initial load (when messages are loaded from database)
+      // Handle initial load: speak if it's the first message (initial greeting for new base)
       if (isInitialLoadRef.current) {
         // Mark that we've processed initial load
         isInitialLoadRef.current = false;
+        
+        // If this is the first message and it's from the assistant, speak it (initial greeting)
+        if (messages.length === 1 && lastMessage.role === 'assistant') {
+          lastMessageRef.current = lastMessage.content;
+          lastMessageIdRef.current = lastMessage.id;
+          speakText(lastMessage.content);
+          return;
+        }
+        
+        // Otherwise, it's loading old messages - don't speak them
         lastMessageRef.current = lastMessage.content;
         lastMessageIdRef.current = lastMessage.id;
         return;

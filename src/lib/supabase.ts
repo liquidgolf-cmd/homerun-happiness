@@ -171,15 +171,12 @@ export const baseProgress = {
 // Pre-assessment helpers
 export const preAssessments = {
   async createPreAssessment(assessment: Omit<PreAssessment, 'id' | 'created_at'>) {
-    // Use upsert to handle duplicates - update if exists, insert if not
+    // Just insert - allow multiple assessments per user
     const { data, error } = await supabase
       .from('pre_assessments')
-      .upsert(assessment, {
-        onConflict: 'user_id',
-        ignoreDuplicates: false
-      })
+      .insert(assessment)
       .select()
-      .single();
+      .maybeSingle();
     return { data, error };
   },
 

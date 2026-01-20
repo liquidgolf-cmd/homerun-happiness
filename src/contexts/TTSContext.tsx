@@ -11,11 +11,32 @@ const TTSContext = createContext<TTSContextType | undefined>(undefined);
 
 let currentAudio: HTMLAudioElement | null = null;
 
+// Normalize text to prevent TTS from spelling out all-caps words
+const normalizeTextForTTS = (text: string): string => {
+  // Convert common all-caps words to proper case
+  const normalized = text
+    .replace(/\b(WHO|WHAT|WHY|HOW|MATTERS)\b/g, (match) => {
+      const word = match.toLowerCase();
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    // Also handle other all-caps words (3+ letters) that might be spelled out
+    .replace(/\b([A-Z]{3,})\b/g, (match) => {
+      // Only convert if it's not an acronym (all caps, 3+ letters, but not common acronyms)
+      const commonAcronyms = ['AI', 'API', 'PDF', 'URL', 'TTS', 'MVP'];
+      if (commonAcronyms.includes(match)) return match;
+      // Convert to title case
+      return match.charAt(0) + match.slice(1).toLowerCase();
+    });
+  
+  return normalized;
+};
+
 // Fallback to browser's Web Speech API if Google TTS fails
 const speakWithBrowserTTS = (text: string): void => {
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
+    const normalizedText = normalizeTextForTTS(text);
+    const utterance = new SpeechSynthesisUtterance(normalizedText);
     utterance.rate = 1.0;
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
@@ -35,7 +56,10 @@ const speakTextImpl = async (text: string): Promise<void> => {
       window.speechSynthesis.cancel();
     }
 
-    console.log('[TTS] Attempting Google Cloud TTS for text:', text.substring(0, 50) + (text.length > 50 ? '...' : ''));
+    // Normalize text before sending to TTS
+    const normalizedText = normalizeTextForTTS(text);
+    
+    console.log('[TTS] Attempting Google Cloud TTS for text:', normalizedText.substring(0, 50) + (normalizedText.length > 50 ? '...' : ''));
     
     try {
       const response = await fetch('/api/ai/tts', {
@@ -43,7 +67,7 @@ const speakTextImpl = async (text: string): Promise<void> => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text: normalizedText }),
       });
 
       if (!response.ok) {
@@ -72,7 +96,7 @@ const speakTextImpl = async (text: string): Promise<void> => {
         console.error('[TTS] Audio playback error:', error);
         currentAudio = null;
         console.log('[TTS] Falling back to browser TTS due to playback error');
-        speakWithBrowserTTS(text);
+        speakWithBrowserTTS(normalizedText);
       };
       
       await audio.play();
@@ -81,11 +105,11 @@ const speakTextImpl = async (text: string): Promise<void> => {
     } catch (apiError: any) {
       console.warn('[TTS] Google Cloud TTS failed, using browser fallback:', apiError?.message);
       console.log('[TTS] Using browser built-in TTS as fallback');
-      speakWithBrowserTTS(text);
+      speakWithBrowserTTS(normalizedText);
     }
   } catch (error: any) {
     console.error('[TTS] Unexpected error:', error);
-    speakWithBrowserTTS(text);
+    speakWithBrowserTTS(normalizeTextForTTS(text));
   }
 };
 

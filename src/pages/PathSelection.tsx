@@ -30,18 +30,15 @@ export default function PathSelection() {
 
     setLoading(true);
     try {
-      const { error: convError } = await startNewConversation(path);
+      // Try to start conversation, but continue even if it fails (duplicate conversation)
+      await startNewConversation(path);
       
-      if (convError) {
-        setError('Failed to start conversation. Please try again.');
-        setLoading(false);
-      } else {
-        navigate('/at-bat');
-      }
+      // Always navigate to At Bat regardless of save status
+      navigate('/at-bat');
     } catch (err) {
-      setError('An unexpected error occurred');
-      setLoading(false);
-      console.error(err);
+      // Even if conversation creation fails, try to continue
+      console.warn('Conversation creation warning:', err);
+      navigate('/at-bat');
     }
   };
 

@@ -13,7 +13,7 @@ import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 export default function AtBat() {
   const { user } = useAuth();
   const { conversation, loading: convLoading, saveRootInsight, updateBase } = useConversation(user?.id);
-  const { messages, loading: chatLoading, whyLevel, sendMessage, reload } = useChat({
+  const { messages, loading: chatLoading, loaded: chatLoaded, whyLevel, sendMessage, reload } = useChat({
     conversation,
     baseStage: 'at_bat',
   });
@@ -22,9 +22,9 @@ export default function AtBat() {
   const [proceeding, setProceeding] = useState(false);
   const [initialMessageSent, setInitialMessageSent] = useState(false);
 
-  // Send initial message when conversation starts
+  // Send initial message when conversation starts (only if no existing messages)
   useEffect(() => {
-    if (conversation && messages.length === 0 && !initialMessageSent && !chatLoading) {
+    if (conversation && chatLoaded && messages.length === 0 && !initialMessageSent) {
       setInitialMessageSent(true);
       
       const sendInitialMessage = async () => {
@@ -45,7 +45,7 @@ Here's my first question: What do you want? Be specific - don't give me generic 
       
       sendInitialMessage();
     }
-  }, [conversation, messages.length, initialMessageSent, chatLoading, reload]);
+  }, [conversation, chatLoaded, messages.length, initialMessageSent, reload]);
 
   useEffect(() => {
     if (whyLevel >= 5 && conversation && !showCompletion) {

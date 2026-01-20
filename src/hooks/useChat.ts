@@ -12,6 +12,7 @@ interface UseChatProps {
 export function useChat({ conversation, baseStage }: UseChatProps) {
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const [whyLevel, setWhyLevel] = useState(1);
 
   useEffect(() => {
@@ -23,9 +24,11 @@ export function useChat({ conversation, baseStage }: UseChatProps) {
   const loadMessages = async () => {
     if (!conversation) return;
 
+    setLoaded(false);
     const { data, error } = await messagesApi.getMessages(conversation.id, baseStage);
     if (error) {
       console.error('Error loading messages:', error);
+      setLoaded(true);
       return;
     }
 
@@ -39,6 +42,7 @@ export function useChat({ conversation, baseStage }: UseChatProps) {
         setWhyLevel(lastAssistantMessage.why_level);
       }
     }
+    setLoaded(true);
   };
 
   const sendMessage = async (content: string) => {
@@ -147,6 +151,7 @@ export function useChat({ conversation, baseStage }: UseChatProps) {
   return {
     messages: chatMessages,
     loading,
+    loaded,
     whyLevel,
     sendMessage,
     reload: loadMessages,

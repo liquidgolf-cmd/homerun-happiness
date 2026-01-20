@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function SignupForm() {
@@ -8,6 +8,7 @@ export default function SignupForm() {
   const [password, setPassword] = useState('');
   const { signup, loading, error } = useAuth();
   const [localError, setLocalError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -26,6 +27,9 @@ export default function SignupForm() {
     const { error } = await signup(email, password, fullName || undefined);
     if (error) {
       setLocalError(error.message || 'Failed to sign up');
+    } else {
+      // Signup successful - redirect to assessment
+      navigate('/assessment');
     }
   };
 

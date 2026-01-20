@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function LoginForm() {
@@ -7,6 +7,7 @@ export default function LoginForm() {
   const [password, setPassword] = useState('');
   const { login, loading, error } = useAuth();
   const [localError, setLocalError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -20,6 +21,9 @@ export default function LoginForm() {
     const { error } = await login(email, password);
     if (error) {
       setLocalError(error.message || 'Failed to login');
+    } else {
+      // Login successful - redirect to assessment
+      navigate('/assessment');
     }
   };
 

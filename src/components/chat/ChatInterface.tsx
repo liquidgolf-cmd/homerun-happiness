@@ -25,8 +25,26 @@ export default function ChatInterface({ messages, loading, onSendMessage }: Chat
     scrollToBottom();
   }, [messages, loading]);
 
+  // Auto-speak coach messages
+  useEffect(() => {
+    if (messages.length > 0 && ttsEnabled) {
+      const lastMessage = messages[messages.length - 1];
+      // Only speak assistant messages that are new
+      if (lastMessage.role === 'assistant' && lastMessage.content !== lastMessageRef.current) {
+        lastMessageRef.current = lastMessage.content;
+        speakText(lastMessage.content);
+      }
+    }
+  }, [messages, ttsEnabled, speakText]);
+
   return (
     <div className="flex flex-col h-full max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+      {/* Header with TTS Toggle */}
+      <div className="bg-gradient-to-r from-homerun-blue to-blue-600 px-4 py-3 flex justify-between items-center">
+        <h3 className="text-white font-semibold">Conversation</h3>
+        <TTSToggle />
+      </div>
+
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {messages.length === 0 && (
           <div className="text-center text-gray-500 py-12">

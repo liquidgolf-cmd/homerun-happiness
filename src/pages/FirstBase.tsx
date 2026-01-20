@@ -129,13 +129,21 @@ export default function FirstBase() {
               <p className="text-gray-600 mb-6">
                 You've completed the 5 Whys and discovered your authentic identity. Ready to move to Second Base and discover WHAT you truly want and what's stopping you?
               </p>
-              <button
-                onClick={handleProceedToSecondBase}
-                disabled={proceeding}
-                className="bg-loam-green text-white px-8 py-4 rounded-loam text-lg font-semibold hover:bg-loam-green/90 focus:outline-none focus:ring-2 focus:ring-loam-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
-              >
-                {proceeding ? 'Moving to Second Base...' : 'Proceed to Second Base'}
-              </button>
+              <div className="flex gap-4 justify-center flex-wrap">
+                <button
+                  onClick={handleProceedToSecondBase}
+                  disabled={proceeding}
+                  className="bg-loam-green text-white px-8 py-4 rounded-loam text-lg font-semibold hover:bg-loam-green/90 focus:outline-none focus:ring-2 focus:ring-loam-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  {proceeding ? 'Moving to Second Base...' : 'Proceed to Second Base'}
+                </button>
+                <button
+                  onClick={() => setShowCompletion(false)}
+                  className="bg-gray-200 text-gray-700 px-8 py-4 rounded-loam text-lg font-semibold hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition"
+                >
+                  Continue Exploring
+                </button>
+              </div>
             </div>
           </div>
         )}

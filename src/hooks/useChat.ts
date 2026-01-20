@@ -9,13 +9,12 @@ interface UseChatProps {
   baseStage: BaseStage;
 }
 
-// Detect if AI response indicates conversation completion
+// Detect if AI response suggests conversation completion (suggestion, not requirement)
 function detectCompletion(response: string, baseStage: BaseStage): boolean {
   const responseLower = response.toLowerCase();
   
-  const completionPhrases = [
-    'conversation is complete',
-    'this conversation is complete',
+  // Softer detection - looks for suggestions, not hard completions
+  const suggestionPhrases = [
     'you\'ve discovered your',
     'this is your root',
     'ready to move',
@@ -24,6 +23,8 @@ function detectCompletion(response: string, baseStage: BaseStage): boolean {
     'ready to explore',
     'ready to map',
     'ready to see',
+    'would you like to explore',
+    'or would you like',
   ];
   
   const nextBasePhrases: Record<BaseStage, string[]> = {
@@ -35,7 +36,7 @@ function detectCompletion(response: string, baseStage: BaseStage): boolean {
     completed: [],
   };
   
-  const hasCompletionPhrase = completionPhrases.some(phrase => 
+  const hasSuggestionPhrase = suggestionPhrases.some(phrase => 
     responseLower.includes(phrase)
   );
   
@@ -43,11 +44,16 @@ function detectCompletion(response: string, baseStage: BaseStage): boolean {
     responseLower.includes(phrase)
   );
   
-  // Also check for explicit completion statements
-  const explicitCompletion = responseLower.includes('complete') && 
-    (responseLower.includes('discovered') || responseLower.includes('root'));
+  // Detect if AI acknowledges discovery and suggests next step
+  const acknowledgesDiscovery = responseLower.includes('discovered') && 
+    (responseLower.includes('your why') || 
+     responseLower.includes('your who') || 
+     responseLower.includes('your what') || 
+     responseLower.includes('your how') ||
+     responseLower.includes('why it matters'));
   
-  return (hasCompletionPhrase && hasNextBasePhrase) || explicitCompletion;
+  // Return true if AI suggests moving forward (but user can still continue)
+  return (hasSuggestionPhrase && hasNextBasePhrase) || (acknowledgesDiscovery && hasNextBasePhrase);
 }
 
 export function useChat({ conversation, baseStage }: UseChatProps) {

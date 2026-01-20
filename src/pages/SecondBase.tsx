@@ -236,13 +236,21 @@ What are you afraid of? What obstacles stand in your way? What fears hold you ba
               <p className="text-gray-600 mb-6">
                 You've completed both 5 Whys sequences and discovered your deepest desires and fears. Ready to move to Third Base and map out HOW you'll make it happen?
               </p>
-              <button
-                onClick={handleProceedToThirdBase}
-                disabled={proceeding}
-                className="bg-loam-green text-white px-8 py-4 rounded-loam text-lg font-semibold hover:bg-loam-green/90 focus:outline-none focus:ring-2 focus:ring-loam-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
-              >
-                {proceeding ? 'Moving to Third Base...' : 'Proceed to Third Base'}
-              </button>
+              <div className="flex gap-4 justify-center flex-wrap">
+                <button
+                  onClick={handleProceedToThirdBase}
+                  disabled={proceeding}
+                  className="bg-loam-green text-white px-8 py-4 rounded-loam text-lg font-semibold hover:bg-loam-green/90 focus:outline-none focus:ring-2 focus:ring-loam-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  {proceeding ? 'Moving to Third Base...' : 'Proceed to Third Base'}
+                </button>
+                <button
+                  onClick={() => setShowCompletion(false)}
+                  className="bg-gray-200 text-gray-700 px-8 py-4 rounded-loam text-lg font-semibold hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition"
+                >
+                  Continue Exploring
+                </button>
+              </div>
             </div>
           </div>
         )}

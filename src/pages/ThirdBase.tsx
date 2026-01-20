@@ -159,13 +159,21 @@ ${whyText ? `${whyText}\n\n` : ''}${whoText ? `${whoText}\n\n` : ''}${whatText ?
               <p className="text-gray-600 mb-6">
                 You've completed the 5 Whys and discovered the obstacles in your way. Ready to move to Home Plate and explore why it MATTERS?
               </p>
-              <button
-                onClick={handleProceedToHomePlate}
-                disabled={proceeding}
-                className="bg-loam-green text-white px-8 py-4 rounded-loam text-lg font-semibold hover:bg-loam-green/90 focus:outline-none focus:ring-2 focus:ring-loam-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
-              >
-                {proceeding ? 'Moving to Home Plate...' : 'Proceed to Home Plate'}
-              </button>
+              <div className="flex gap-4 justify-center flex-wrap">
+                <button
+                  onClick={handleProceedToHomePlate}
+                  disabled={proceeding}
+                  className="bg-loam-green text-white px-8 py-4 rounded-loam text-lg font-semibold hover:bg-loam-green/90 focus:outline-none focus:ring-2 focus:ring-loam-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  {proceeding ? 'Moving to Home Plate...' : 'Proceed to Home Plate'}
+                </button>
+                <button
+                  onClick={() => setShowCompletion(false)}
+                  className="bg-gray-200 text-gray-700 px-8 py-4 rounded-loam text-lg font-semibold hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition"
+                >
+                  Continue Exploring
+                </button>
+              </div>
             </div>
           </div>
         )}

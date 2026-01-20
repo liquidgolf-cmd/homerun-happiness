@@ -78,13 +78,13 @@ You're at Why Level ${whyLevel} of 5. Each "why" should go deeper than the last.
 ${whyLevel < 5 ? `Ask the next "why" question. Make it more specific and deeper than before.` : `You've reached the 5th "why" - summarize the root insight they've discovered.`}
 
 ${shouldEvaluateCompletion ? `
-IMPORTANT - Completion Detection:
+IMPORTANT - Completion Suggestion:
 Evaluate if the user has discovered a genuine root insight. If their answer reveals a deep, fundamental truth about their ${baseStage === 'at_bat' ? 'WHY' : baseStage === 'first_base' ? 'WHO' : baseStage === 'second_base' ? 'WHAT' : baseStage === 'third_base' ? 'HOW' : 'WHY IT MATTERS'}, then:
 
 1. Summarize the root insight clearly in 1-2 sentences
-2. Explicitly state: "You've discovered your ${baseStage === 'at_bat' ? 'WHY' : baseStage === 'first_base' ? 'WHO' : baseStage === 'second_base' ? 'WHAT' : baseStage === 'third_base' ? 'HOW' : 'WHY IT MATTERS'}. This conversation is complete."
-3. Encourage next step: "${nextBaseGuidance}?"
-4. Keep it concise, celebratory, and direct
+2. Acknowledge their discovery: "You've discovered your ${baseStage === 'at_bat' ? 'WHY' : baseStage === 'first_base' ? 'WHO' : baseStage === 'second_base' ? 'WHAT' : baseStage === 'third_base' ? 'HOW' : 'WHY IT MATTERS'}."
+3. Suggest next step (but don't force it): "Ready to move forward? ${nextBaseGuidance}? Or would you like to explore this deeper?"
+4. Keep it concise, celebratory, and inviting - let them choose to continue or move on
 
 If the insight isn't deep enough yet, continue asking "why" to dig deeper.
 ` : ''}

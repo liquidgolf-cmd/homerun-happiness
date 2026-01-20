@@ -1,18 +1,47 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useConversation } from '@/hooks/useConversation';
+import { messages as messagesApi } from '@/lib/supabase';
+import { downloadFullJourneyPDF } from '@/utils/pdfExport';
+import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { Message } from '@/types/conversation';
 
 export default function Report() {
   const { user, logout } = useAuth();
   const { conversation, loading } = useConversation(user?.id);
   const navigate = useNavigate();
+  const [allMessages, setAllMessages] = useState<Message[]>([]);
+  const [loadingMessages, setLoadingMessages] = useState(false);
 
   useEffect(() => {
     if (!user) {
       navigate('/login');
     }
   }, [user, navigate]);
+
+  useEffect(() => {
+    if (conversation) {
+      loadAllMessages();
+    }
+  }, [conversation]);
+
+  const loadAllMessages = async () => {
+    if (!conversation) return;
+    
+    setLoadingMessages(true);
+    const { data } = await messagesApi.getMessages(conversation.id);
+    if (data) {
+      setAllMessages(data);
+    }
+    setLoadingMessages(false);
+  };
+
+  const handleDownloadJourney = () => {
+    if (conversation && allMessages.length > 0) {
+      downloadFullJourneyPDF(conversation, allMessages);
+    }
+  };
 
   if (loading) {
     return (
@@ -100,6 +129,24 @@ export default function Report() {
               </div>
             </div>
           </div>
+
+          {/* Download Full Journey */}
+          {allMessages.length > 0 && (
+            <div className="bg-white rounded-lg shadow-md p-6 text-center">
+              <h2 className="text-xl font-bold text-gray-900 mb-3">Download Your Complete Journey</h2>
+              <p className="text-gray-600 mb-4">
+                Get a PDF with all your conversations, insights, and progress
+              </p>
+              <button
+                onClick={handleDownloadJourney}
+                disabled={loadingMessages}
+                className="inline-flex items-center gap-2 bg-homerun-blue text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50"
+              >
+                <ArrowDownTrayIcon className="w-5 h-5" />
+                Download Complete Journey
+              </button>
+            </div>
+          )}
 
           {/* Next Steps */}
           <div className="bg-gradient-to-r from-homerun-blue to-homerun-green rounded-lg shadow-lg p-8 text-white text-center">

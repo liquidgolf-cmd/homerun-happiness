@@ -113,7 +113,8 @@ What are you afraid of? What obstacles stand in your way? What fears hold you ba
 
   // Save root_fear and mark complete after second sequence completes
   useEffect(() => {
-    if (fearComplete && conversation && !showCompletion) {
+    if ((isComplete && fearComplete) || (fearComplete && whyLevel >= 5)) {
+      if (conversation && !showCompletion) {
       // Mark why sequence as complete
       baseProgress.updateBaseProgress(conversation.id, 'second_base', {
         why_sequence_complete: true,
@@ -134,9 +135,10 @@ What are you afraid of? What obstacles stand in your way? What fears hold you ba
         saveRootInsight('root_fear', lastFearMessage.content);
       }
       
-      setShowCompletion(true);
+        setShowCompletion(true);
+      }
     }
-  }, [fearComplete, conversation, messages, showCompletion, saveRootInsight]);
+  }, [isComplete, fearComplete, whyLevel, conversation, messages, showCompletion, saveRootInsight]);
 
   const handleProceedToThirdBase = async () => {
     if (!conversation || proceeding) return;

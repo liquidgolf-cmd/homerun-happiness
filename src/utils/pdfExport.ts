@@ -52,7 +52,7 @@ export function downloadConversationPDF(
   yPosition += 10;
 
   // Messages
-  messages.forEach((message, index) => {
+  messages.forEach((message) => {
     const isCoach = message.role === 'assistant';
     const timestamp = new Date(message.created_at).toLocaleString();
 

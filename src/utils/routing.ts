@@ -27,9 +27,9 @@ export async function getRedirectPath(userId: string): Promise<string> {
     
     if (!convError && conversation) {
       // User has an active conversation - redirect to their current base
-      const route = baseStageToRoute[conversation.current_base];
-      if (route) {
-        return route;
+      const currentBase = conversation.current_base;
+      if (currentBase && currentBase in baseStageToRoute) {
+        return baseStageToRoute[currentBase as BaseStage];
       }
       // Fallback if base stage doesn't match (shouldn't happen, but safe)
       return '/at-bat';

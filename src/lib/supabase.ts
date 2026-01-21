@@ -39,6 +39,16 @@ export const auth = {
     return { error };
   },
 
+  async signInWithGoogle() {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/assessment`,
+      },
+    });
+    return { data, error };
+  },
+
   async getCurrentUser() {
     const { data: { user }, error } = await supabase.auth.getUser();
     return { user, error };

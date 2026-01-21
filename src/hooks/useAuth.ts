@@ -70,6 +70,20 @@ export function useAuth() {
     return { error: null };
   };
 
+  const signInWithGoogle = async () => {
+    setLoading(true);
+    setError(null);
+    const { data, error } = await auth.signInWithGoogle();
+    if (error) {
+      setError(error);
+      setLoading(false);
+      return { error };
+    }
+    // Note: OAuth redirects away, so we won't set user here
+    // The redirect will happen, and onAuthStateChange will handle the session
+    return { data, error: null };
+  };
+
   return {
     user,
     loading,
@@ -77,5 +91,6 @@ export function useAuth() {
     login,
     signup,
     logout,
+    signInWithGoogle,
   };
 }

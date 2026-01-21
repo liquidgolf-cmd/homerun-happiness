@@ -41,7 +41,12 @@ export const auth = {
 
   async signInWithGoogle() {
     // Use environment variable for production URL, fallback to current origin for development
-    const appUrl = import.meta.env.VITE_APP_URL || window.location.origin;
+    // In production (Vercel), use the production URL; in development, use current origin
+    const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
+    const appUrl = isProduction 
+      ? (import.meta.env.VITE_APP_URL || 'https://homerun-happiness.vercel.app')
+      : (import.meta.env.VITE_APP_URL || window.location.origin);
+    
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {

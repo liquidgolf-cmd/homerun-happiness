@@ -1,10 +1,11 @@
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { preAssessments } from '@/lib/supabase';
+import { getRedirectPath } from '@/utils/routing';
 
 export default function Assessment() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [happinessScore, setHappinessScore] = useState(5);
   const [clarityScore, setClarityScore] = useState(5);
@@ -12,6 +13,33 @@ export default function Assessment() {
   const [biggestChallenge, setBiggestChallenge] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [checkingProgress, setCheckingProgress] = useState(true);
+
+  // Auto-redirect if user has already completed assessment
+  useEffect(() => {
+    const checkProgress = async () => {
+      if (authLoading || !user?.id) {
+        setCheckingProgress(false);
+        return;
+      }
+
+      try {
+        const redirectPath = await getRedirectPath(user.id);
+        // If redirect path is not assessment, user has already completed it
+        if (redirectPath !== '/assessment') {
+          navigate(redirectPath, { replace: true });
+          return;
+        }
+      } catch (err) {
+        console.error('Error checking progress:', err);
+        // Continue to show assessment form if check fails
+      } finally {
+        setCheckingProgress(false);
+      }
+    };
+
+    checkProgress();
+  }, [user?.id, authLoading, navigate]);
 
   const calculateRecommendedPath = () => {
     const totalScore = happinessScore + clarityScore + readinessScore;
@@ -62,6 +90,18 @@ export default function Assessment() {
       setLoading(false);
     }
   };
+
+  // Show loading state while checking progress
+  if (checkingProgress || authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-loam-brown"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-loam-neutral to-loam-neutral px-4 py-12">

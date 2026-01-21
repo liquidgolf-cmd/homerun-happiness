@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { getRedirectPath } from '@/utils/routing';
 
 export default function LoginForm() {
   const [email, setEmail] = useState('');
@@ -18,12 +19,24 @@ export default function LoginForm() {
       return;
     }
 
-    const { error } = await login(email, password);
+    const { error, data } = await login(email, password);
     if (error) {
       setLocalError(error.message || 'Failed to login');
     } else {
-      // Login successful - redirect to assessment
-      navigate('/assessment');
+      // Login successful - determine redirect path based on user progress
+      if (data?.user?.id) {
+        try {
+          const redirectPath = await getRedirectPath(data.user.id);
+          navigate(redirectPath);
+        } catch (err) {
+          console.error('Error determining redirect path:', err);
+          // Fallback to assessment if routing fails
+          navigate('/assessment');
+        }
+      } else {
+        // Fallback if user data not available
+        navigate('/assessment');
+      }
     }
   };
 

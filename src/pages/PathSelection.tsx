@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useConversation } from '@/hooks/useConversation';
 import { JourneyType } from '@/types/conversation';
+import { getRedirectPath } from '@/utils/routing';
 
 export default function PathSelection() {
-  const { user } = useAuth();
-  const { startNewConversation } = useConversation(user?.id);
+  const { user, loading: authLoading } = useAuth();
+  const { startNewConversation, conversation, loading: convLoading } = useConversation(user?.id);
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -18,6 +19,36 @@ export default function PathSelection() {
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [checkingProgress, setCheckingProgress] = useState(true);
+
+  // Auto-redirect if user has already started a conversation
+  useEffect(() => {
+    const checkProgress = async () => {
+      if (authLoading || convLoading || !user?.id) {
+        setCheckingProgress(false);
+        return;
+      }
+
+      // If conversation already exists, redirect to current base
+      if (conversation) {
+        try {
+          const redirectPath = await getRedirectPath(user.id);
+          // If redirect path is not path-selection, user has already started
+          if (redirectPath !== '/path-selection') {
+            navigate(redirectPath, { replace: true });
+            return;
+          }
+        } catch (err) {
+          console.error('Error checking progress:', err);
+          // Continue to show path selection if check fails
+        }
+      }
+      
+      setCheckingProgress(false);
+    };
+
+    checkProgress();
+  }, [user?.id, authLoading, convLoading, conversation, navigate]);
 
   const handlePathSelect = async (path: JourneyType) => {
     setSelectedPath(path);
@@ -41,6 +72,18 @@ export default function PathSelection() {
       navigate('/at-bat');
     }
   };
+
+  // Show loading state while checking progress
+  if (checkingProgress || authLoading || convLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-loam-brown"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-loam-neutral to-loam-neutral px-4 py-12">

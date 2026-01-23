@@ -152,3 +152,75 @@ Keep responses under 100 words. Be direct, empathetic, and push them deeper.`;
     throw error;
   }
 }
+
+export async function generateBreakthroughSummary(
+  messages: Message[],
+  baseStage: BaseStage,
+  rootInsight: string
+): Promise<string> {
+  if (!anthropic) {
+    throw new Error('Anthropic API key not configured');
+  }
+
+  const baseInfo = BASE_STAGES.find(b => b.key === baseStage);
+  const baseLabel = baseInfo?.label || baseStage;
+  const baseDescription = baseInfo?.description || '';
+
+  // Build system prompt for summary generation
+  const systemPrompt = `You are a thoughtful life coach who helps people recognize and celebrate their breakthroughs. Your task is to write a powerful, inspirational summary of a user's discovery journey.
+
+Analyze the conversation and create a 2-3 paragraph summary that captures:
+1. What the user discovered (the breakthrough/insight)
+2. Why this discovery is significant and transformative
+3. The shift or transformation that occurred in their thinking
+
+The summary should:
+- Be warm, celebratory, and inspiring
+- Focus on the "aha moment" and personal growth
+- Use second person ("you") to speak directly to the user
+- Be concise but meaningful (approximately 200-300 words)
+- Feel like a milestone achievement worth celebrating
+
+Current Stage: ${baseLabel} - ${baseDescription}
+Root Insight: ${rootInsight.substring(0, 500)}${rootInsight.length > 500 ? '...' : ''}
+
+Write the summary now. Do not include any meta-commentary or instructions - just the summary itself.`;
+
+  // Build message history for context
+  const conversationMessages: Array<{ role: 'user' | 'assistant'; content: string }> = [];
+  
+  // Include all messages from this base stage to understand the full journey
+  for (const msg of messages) {
+    if (msg.role === 'user' || msg.role === 'assistant') {
+      conversationMessages.push({
+        role: msg.role,
+        content: msg.content,
+      });
+    }
+  }
+
+  // Add a final instruction message
+  conversationMessages.push({
+    role: 'user',
+    content: `Based on this entire conversation, write a powerful summary of my breakthrough discovery. Focus on what I learned about myself, why it matters, and how this represents a transformation in my understanding.`,
+  });
+
+  try {
+    const response = await anthropic.messages.create({
+      model,
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: conversationMessages,
+    });
+
+    const content = response.content[0];
+    if (content.type !== 'text') {
+      throw new Error('Unexpected response type from Anthropic API');
+    }
+
+    return content.text.trim();
+  } catch (error) {
+    console.error('Error generating breakthrough summary:', error);
+    throw error;
+  }
+}

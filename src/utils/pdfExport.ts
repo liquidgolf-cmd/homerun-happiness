@@ -110,6 +110,82 @@ export function downloadConversationPDF(
   doc.save(fileName);
 }
 
+export function downloadSummaryPDF(
+  summary: string,
+  _baseStage: string,
+  title: string
+) {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 20;
+  const maxWidth = pageWidth - 2 * margin;
+  let yPosition = margin;
+
+  // Helper to add new page if needed
+  const checkNewPage = (height: number) => {
+    if (yPosition + height > pageHeight - margin) {
+      doc.addPage();
+      yPosition = margin;
+    }
+  };
+
+  // Header with branding
+  doc.setFontSize(20);
+  doc.setFont('helvetica', 'bold');
+  doc.text('HomeRun to Happiness', pageWidth / 2, yPosition, { align: 'center' });
+  yPosition += 12;
+
+  // Section title
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.text(title, pageWidth / 2, yPosition, { align: 'center' });
+  yPosition += 10;
+
+  // Date
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(100, 100, 100);
+  const dateStr = `Generated: ${new Date().toLocaleDateString()}`;
+  doc.text(dateStr, pageWidth / 2, yPosition, { align: 'center' });
+  yPosition += 15;
+
+  // Decorative line
+  doc.setDrawColor(200, 200, 200);
+  doc.line(margin, yPosition, pageWidth - margin, yPosition);
+  yPosition += 15;
+
+  // Summary content
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(0, 0, 0);
+  const lines = doc.splitTextToSize(summary, maxWidth);
+  
+  lines.forEach((line: string) => {
+    checkNewPage(6);
+    doc.text(line, margin, yPosition);
+    yPosition += 6;
+  });
+
+  // Footer
+  const totalPages = doc.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.text(
+      `Page ${i} of ${totalPages}`,
+      pageWidth / 2,
+      pageHeight - 10,
+      { align: 'center' }
+    );
+  }
+
+  // Download
+  const fileName = `${title.replace(/\s+/g, '_')}_Summary_${new Date().toISOString().split('T')[0]}.pdf`;
+  doc.save(fileName);
+}
+
 export function downloadFullJourneyPDF(
   conversation: Conversation,
   allMessages: Message[]
@@ -155,6 +231,52 @@ export function downloadFullJourneyPDF(
   });
 
   yPosition += 10;
+
+  // Breakthrough Summaries
+  const summaries: Array<{ stage: string; label: string; summary: string }> = [];
+  if (conversation.at_bat_summary) {
+    summaries.push({ stage: 'at_bat', label: 'At Bat - Discovering WHY', summary: conversation.at_bat_summary });
+  }
+  if (conversation.first_base_summary) {
+    summaries.push({ stage: 'first_base', label: 'First Base - Discovering WHO', summary: conversation.first_base_summary });
+  }
+  if (conversation.second_base_summary) {
+    summaries.push({ stage: 'second_base', label: 'Second Base - Discovering WHAT', summary: conversation.second_base_summary });
+  }
+  if (conversation.third_base_summary) {
+    summaries.push({ stage: 'third_base', label: 'Third Base - Mapping HOW', summary: conversation.third_base_summary });
+  }
+  if (conversation.home_plate_summary) {
+    summaries.push({ stage: 'home_plate', label: 'Home Plate - Why it MATTERS', summary: conversation.home_plate_summary });
+  }
+
+  if (summaries.length > 0) {
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    checkNewPage(10);
+    doc.text('Your Breakthrough Summaries', margin, yPosition);
+    yPosition += 12;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+
+    summaries.forEach(({ label, summary }) => {
+      checkNewPage(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text(label + ':', margin, yPosition);
+      yPosition += 7;
+      doc.setFont('helvetica', 'normal');
+      const summaryLines = doc.splitTextToSize(summary, maxWidth);
+      summaryLines.forEach((line: string) => {
+        checkNewPage(5);
+        doc.text(line, margin, yPosition);
+        yPosition += 5;
+      });
+      yPosition += 10;
+    });
+
+    yPosition += 5;
+  }
 
   // Insights
   if (conversation.root_why || conversation.root_identity) {

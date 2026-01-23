@@ -6,13 +6,15 @@ import { useChat } from '@/hooks/useChat';
 import ChatInterface from '@/components/chat/ChatInterface';
 import ProgressBar from '@/components/progress/ProgressBar';
 import WhyCounter from '@/components/progress/WhyCounter';
+import SummaryCard from '@/components/progress/SummaryCard';
 import { baseProgress, messages as messagesApi } from '@/lib/supabase';
 import { downloadConversationPDF } from '@/utils/pdfExport';
+import { generateBreakthroughSummary } from '@/lib/anthropic';
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 
 export default function AtBat() {
   const { user } = useAuth();
-  const { conversation, loading: convLoading, saveRootInsight, updateBase } = useConversation(user?.id);
+  const { conversation, loading: convLoading, saveRootInsight, saveSummary, updateBase } = useConversation(user?.id);
   const { messages, loading: chatLoading, loaded: chatLoaded, whyLevel, isComplete, sendMessage, reload } = useChat({
     conversation,
     baseStage: 'at_bat',
@@ -21,6 +23,8 @@ export default function AtBat() {
   const [showCompletion, setShowCompletion] = useState(false);
   const [proceeding, setProceeding] = useState(false);
   const [initialMessageSent, setInitialMessageSent] = useState(false);
+  const [summary, setSummary] = useState<string | null>(null);
+  const [generatingSummary, setGeneratingSummary] = useState(false);
 
   // Send initial message when conversation starts (only if no existing messages)
   useEffect(() => {
@@ -49,24 +53,50 @@ Here's my first question: What do you want? Be specific - don't give me generic 
 
   useEffect(() => {
     if ((isComplete || whyLevel >= 5) && conversation && !showCompletion) {
-      // Mark why sequence as complete
-      baseProgress.updateBaseProgress(conversation.id, 'at_bat', {
-        why_sequence_complete: true,
-      });
-      
-      // Extract root insight from last assistant message
-      const lastAssistantMessage = messages
-        .filter(m => m.role === 'assistant')
-        .pop();
-      
-      if (lastAssistantMessage?.content) {
-        // Save root why (in a real app, we'd extract this better from AI response)
-        saveRootInsight('root_why', lastAssistantMessage.content);
-      }
-      
-      setShowCompletion(true);
+      const handleCompletion = async () => {
+        // Mark why sequence as complete
+        await baseProgress.updateBaseProgress(conversation.id, 'at_bat', {
+          why_sequence_complete: true,
+        });
+        
+        // Extract root insight from last assistant message
+        const lastAssistantMessage = messages
+          .filter(m => m.role === 'assistant')
+          .pop();
+        
+        const rootInsight = lastAssistantMessage?.content || '';
+        
+        if (rootInsight) {
+          // Save root why
+          await saveRootInsight('root_why', rootInsight);
+        }
+
+        // Generate summary if we don't have one yet
+        if (!conversation.at_bat_summary && messages.length > 0) {
+          setGeneratingSummary(true);
+          try {
+            const generatedSummary = await generateBreakthroughSummary(
+              messages,
+              'at_bat',
+              rootInsight
+            );
+            setSummary(generatedSummary);
+            await saveSummary('at_bat', generatedSummary);
+          } catch (error) {
+            console.error('Error generating summary:', error);
+          } finally {
+            setGeneratingSummary(false);
+          }
+        } else if (conversation.at_bat_summary) {
+          setSummary(conversation.at_bat_summary);
+        }
+        
+        setShowCompletion(true);
+      };
+
+      handleCompletion();
     }
-  }, [isComplete, whyLevel, conversation, messages, showCompletion, saveRootInsight]);
+  }, [isComplete, whyLevel, conversation, messages, showCompletion, saveRootInsight, saveSummary]);
 
   const handleProceedToFirstBase = async () => {
     if (!conversation || proceeding) return;
@@ -144,34 +174,43 @@ Here's my first question: What do you want? Be specific - don't give me generic 
         </div>
 
         {showCompletion && (
-          <div className="mt-6 bg-white rounded-loam shadow-lg p-8 border-2 border-loam-green">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-loam-green rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4">
-                ✓
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                You've Discovered Your WHY!
-              </h2>
-              <p className="text-gray-600 mb-6">
-                You've completed the 5 Whys and discovered your deepest motivation. Ready to move to First Base and discover WHO you really are?
-              </p>
-              <div className="flex gap-4 justify-center flex-wrap">
-                <button
-                  onClick={handleProceedToFirstBase}
-                  disabled={proceeding}
-                  className="bg-loam-green text-white px-8 py-4 rounded-loam text-lg font-semibold hover:bg-loam-green/90 focus:outline-none focus:ring-2 focus:ring-loam-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                >
-                  {proceeding ? 'Moving to First Base...' : 'Proceed to First Base'}
-                </button>
-                <button
-                  onClick={() => setShowCompletion(false)}
-                  className="bg-gray-200 text-gray-700 px-8 py-4 rounded-loam text-lg font-semibold hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition"
-                >
-                  Continue Exploring
-                </button>
+          <>
+            {(summary || generatingSummary) && (
+              <SummaryCard
+                summary={summary || ''}
+                baseStage="at_bat"
+                loading={generatingSummary}
+              />
+            )}
+            <div className="mt-6 bg-white rounded-loam shadow-lg p-8 border-2 border-loam-green">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-loam-green rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4">
+                  ✓
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  You've Discovered Your WHY!
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  You've completed the 5 Whys and discovered your deepest motivation. Ready to move to First Base and discover WHO you really are?
+                </p>
+                <div className="flex gap-4 justify-center flex-wrap">
+                  <button
+                    onClick={handleProceedToFirstBase}
+                    disabled={proceeding}
+                    className="bg-loam-green text-white px-8 py-4 rounded-loam text-lg font-semibold hover:bg-loam-green/90 focus:outline-none focus:ring-2 focus:ring-loam-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    {proceeding ? 'Moving to First Base...' : 'Proceed to First Base'}
+                  </button>
+                  <button
+                    onClick={() => setShowCompletion(false)}
+                    className="bg-gray-200 text-gray-700 px-8 py-4 rounded-loam text-lg font-semibold hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition"
+                  >
+                    Continue Exploring
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>

@@ -114,6 +114,42 @@ export function useConversation(userId: string | undefined) {
     return { data, error: null };
   };
 
+  const saveSummary = async (baseStage: BaseStage, summary: string) => {
+    if (!conversation) {
+      throw new Error('No active conversation');
+    }
+
+    setError(null);
+    const fieldMap: Record<BaseStage, string> = {
+      at_bat: 'at_bat_summary',
+      first_base: 'first_base_summary',
+      second_base: 'second_base_summary',
+      third_base: 'third_base_summary',
+      home_plate: 'home_plate_summary',
+      completed: 'home_plate_summary', // Fallback for completed
+    };
+
+    const field = fieldMap[baseStage];
+    if (!field) {
+      throw new Error(`Invalid base stage: ${baseStage}`);
+    }
+
+    const updates: Record<string, string> = {};
+    updates[field] = summary;
+
+    const { data, error } = await conversations.updateConversation(conversation.id, updates as Partial<Conversation>);
+
+    if (error) {
+      setError(error);
+      return { error };
+    }
+
+    if (data) {
+      setConversation(data);
+    }
+    return { data, error: null };
+  };
+
   const reload = async () => {
     await loadActiveConversation();
   };
@@ -125,6 +161,7 @@ export function useConversation(userId: string | undefined) {
     startNewConversation,
     updateBase,
     saveRootInsight,
+    saveSummary,
     reload,
   };
 }

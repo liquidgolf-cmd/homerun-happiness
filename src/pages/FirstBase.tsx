@@ -6,13 +6,15 @@ import { useChat } from '@/hooks/useChat';
 import ChatInterface from '@/components/chat/ChatInterface';
 import ProgressBar from '@/components/progress/ProgressBar';
 import WhyCounter from '@/components/progress/WhyCounter';
+import SummaryCard from '@/components/progress/SummaryCard';
 import { baseProgress, messages as messagesApi } from '@/lib/supabase';
 import { downloadConversationPDF } from '@/utils/pdfExport';
+import { generateBreakthroughSummary } from '@/lib/anthropic';
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 
 export default function FirstBase() {
   const { user } = useAuth();
-  const { conversation, loading: convLoading, saveRootInsight, updateBase } = useConversation(user?.id);
+  const { conversation, loading: convLoading, saveRootInsight, saveSummary, updateBase } = useConversation(user?.id);
   const { messages, loading: chatLoading, loaded: chatLoaded, whyLevel, isComplete, sendMessage, reload } = useChat({
     conversation,
     baseStage: 'first_base',
@@ -21,6 +23,8 @@ export default function FirstBase() {
   const [showCompletion, setShowCompletion] = useState(false);
   const [proceeding, setProceeding] = useState(false);
   const [initialMessageSent, setInitialMessageSent] = useState(false);
+  const [summary, setSummary] = useState<string | null>(null);
+  const [generatingSummary, setGeneratingSummary] = useState(false);
 
   // Send initial message when conversation starts (only if no existing messages)
   useEffect(() => {
@@ -49,24 +53,50 @@ Here's my question: When you strip away your job title, your roles, and what oth
 
   useEffect(() => {
     if ((isComplete || whyLevel >= 5) && conversation && !showCompletion) {
-      // Mark why sequence as complete
-      baseProgress.updateBaseProgress(conversation.id, 'first_base', {
-        why_sequence_complete: true,
-      });
-      
-      // Extract root insight from last assistant message
-      const lastAssistantMessage = messages
-        .filter(m => m.role === 'assistant')
-        .pop();
-      
-      if (lastAssistantMessage?.content) {
-        // Save root identity
-        saveRootInsight('root_identity', lastAssistantMessage.content);
-      }
-      
-      setShowCompletion(true);
+      const handleCompletion = async () => {
+        // Mark why sequence as complete
+        await baseProgress.updateBaseProgress(conversation.id, 'first_base', {
+          why_sequence_complete: true,
+        });
+        
+        // Extract root insight from last assistant message
+        const lastAssistantMessage = messages
+          .filter(m => m.role === 'assistant')
+          .pop();
+        
+        const rootInsight = lastAssistantMessage?.content || '';
+        
+        if (rootInsight) {
+          // Save root identity
+          await saveRootInsight('root_identity', rootInsight);
+        }
+
+        // Generate summary if we don't have one yet
+        if (!conversation.first_base_summary && messages.length > 0) {
+          setGeneratingSummary(true);
+          try {
+            const generatedSummary = await generateBreakthroughSummary(
+              messages,
+              'first_base',
+              rootInsight
+            );
+            setSummary(generatedSummary);
+            await saveSummary('first_base', generatedSummary);
+          } catch (error) {
+            console.error('Error generating summary:', error);
+          } finally {
+            setGeneratingSummary(false);
+          }
+        } else if (conversation.first_base_summary) {
+          setSummary(conversation.first_base_summary);
+        }
+        
+        setShowCompletion(true);
+      };
+
+      handleCompletion();
     }
-  }, [isComplete, whyLevel, conversation, messages, showCompletion, saveRootInsight]);
+  }, [isComplete, whyLevel, conversation, messages, showCompletion, saveRootInsight, saveSummary]);
 
   const handleProceedToSecondBase = async () => {
     if (!conversation || proceeding) return;
@@ -144,34 +174,43 @@ Here's my question: When you strip away your job title, your roles, and what oth
         </div>
 
         {showCompletion && (
-          <div className="mt-6 bg-white rounded-loam shadow-lg p-8 border-2 border-loam-green">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-loam-green rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4">
-                ✓
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                You've Discovered WHO You Really Are!
-              </h2>
-              <p className="text-gray-600 mb-6">
-                You've completed the 5 Whys and discovered your authentic identity. Ready to move to Second Base and discover WHAT you truly want and what's stopping you?
-              </p>
-              <div className="flex gap-4 justify-center flex-wrap">
-                <button
-                  onClick={handleProceedToSecondBase}
-                  disabled={proceeding}
-                  className="bg-loam-green text-white px-8 py-4 rounded-loam text-lg font-semibold hover:bg-loam-green/90 focus:outline-none focus:ring-2 focus:ring-loam-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                >
-                  {proceeding ? 'Moving to Second Base...' : 'Proceed to Second Base'}
-                </button>
-                <button
-                  onClick={() => setShowCompletion(false)}
-                  className="bg-gray-200 text-gray-700 px-8 py-4 rounded-loam text-lg font-semibold hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition"
-                >
-                  Continue Exploring
-                </button>
+          <>
+            {(summary || generatingSummary) && (
+              <SummaryCard
+                summary={summary || ''}
+                baseStage="first_base"
+                loading={generatingSummary}
+              />
+            )}
+            <div className="mt-6 bg-white rounded-loam shadow-lg p-8 border-2 border-loam-green">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-loam-green rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4">
+                  ✓
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  You've Discovered WHO You Really Are!
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  You've completed the 5 Whys and discovered your authentic identity. Ready to move to Second Base and discover WHAT you truly want and what's stopping you?
+                </p>
+                <div className="flex gap-4 justify-center flex-wrap">
+                  <button
+                    onClick={handleProceedToSecondBase}
+                    disabled={proceeding}
+                    className="bg-loam-green text-white px-8 py-4 rounded-loam text-lg font-semibold hover:bg-loam-green/90 focus:outline-none focus:ring-2 focus:ring-loam-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    {proceeding ? 'Moving to Second Base...' : 'Proceed to Second Base'}
+                  </button>
+                  <button
+                    onClick={() => setShowCompletion(false)}
+                    className="bg-gray-200 text-gray-700 px-8 py-4 rounded-loam text-lg font-semibold hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition"
+                  >
+                    Continue Exploring
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>

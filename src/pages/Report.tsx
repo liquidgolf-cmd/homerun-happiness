@@ -123,6 +123,12 @@ export default function Report() {
                 <span className="text-sm text-gray-500">(At Bat)</span>
               </div>
               <p className="text-gray-700 whitespace-pre-wrap">{conversation.root_why}</p>
+              {conversation.at_bat_summary && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Breakthrough Summary</h3>
+                  <p className="text-gray-700 whitespace-pre-wrap italic">{conversation.at_bat_summary}</p>
+                </div>
+              )}
             </div>
           )}
 
@@ -135,6 +141,12 @@ export default function Report() {
                 <span className="text-sm text-gray-500">(First Base)</span>
               </div>
               <p className="text-gray-700 whitespace-pre-wrap">{conversation.root_identity}</p>
+              {conversation.first_base_summary && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Breakthrough Summary</h3>
+                  <p className="text-gray-700 whitespace-pre-wrap italic">{conversation.first_base_summary}</p>
+                </div>
+              )}
             </div>
           )}
 
@@ -147,6 +159,12 @@ export default function Report() {
                 <span className="text-sm text-gray-500">(Second Base)</span>
               </div>
               <p className="text-gray-700 whitespace-pre-wrap">{conversation.root_desire}</p>
+              {conversation.second_base_summary && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Breakthrough Summary</h3>
+                  <p className="text-gray-700 whitespace-pre-wrap italic">{conversation.second_base_summary}</p>
+                </div>
+              )}
             </div>
           )}
 
@@ -171,6 +189,12 @@ export default function Report() {
                 <span className="text-sm text-gray-500">(Third Base)</span>
               </div>
               <p className="text-gray-700 whitespace-pre-wrap">{conversation.root_obstacle}</p>
+              {conversation.third_base_summary && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Breakthrough Summary</h3>
+                  <p className="text-gray-700 whitespace-pre-wrap italic">{conversation.third_base_summary}</p>
+                </div>
+              )}
             </div>
           )}
 
@@ -183,6 +207,12 @@ export default function Report() {
                 <span className="text-sm text-gray-500">(Home Plate)</span>
               </div>
               <p className="text-gray-700 whitespace-pre-wrap">{conversation.root_legacy}</p>
+              {conversation.home_plate_summary && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Breakthrough Summary</h3>
+                  <p className="text-gray-700 whitespace-pre-wrap italic">{conversation.home_plate_summary}</p>
+                </div>
+              )}
             </div>
           )}
 

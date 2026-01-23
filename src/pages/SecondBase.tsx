@@ -6,13 +6,15 @@ import { useChat } from '@/hooks/useChat';
 import ChatInterface from '@/components/chat/ChatInterface';
 import ProgressBar from '@/components/progress/ProgressBar';
 import WhyCounter from '@/components/progress/WhyCounter';
+import SummaryCard from '@/components/progress/SummaryCard';
 import { baseProgress, messages as messagesApi } from '@/lib/supabase';
 import { downloadConversationPDF } from '@/utils/pdfExport';
+import { generateBreakthroughSummary } from '@/lib/anthropic';
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 
 export default function SecondBase() {
   const { user } = useAuth();
-  const { conversation, loading: convLoading, saveRootInsight, updateBase } = useConversation(user?.id);
+  const { conversation, loading: convLoading, saveRootInsight, saveSummary, updateBase } = useConversation(user?.id);
   const { messages, loading: chatLoading, loaded: chatLoaded, whyLevel, isComplete, sendMessage, reload } = useChat({
     conversation,
     baseStage: 'second_base',
@@ -25,6 +27,8 @@ export default function SecondBase() {
   const [desireComplete, setDesireComplete] = useState(false);
   const [fearComplete, setFearComplete] = useState(false);
   const [transitionSent, setTransitionSent] = useState(false);
+  const [summary, setSummary] = useState<string | null>(null);
+  const [generatingSummary, setGeneratingSummary] = useState(false);
 
   // Determine current sequence based on why level and completion state
   useEffect(() => {
@@ -115,30 +119,56 @@ What are you afraid of? What obstacles stand in your way? What fears hold you ba
   useEffect(() => {
     if ((isComplete && fearComplete) || (fearComplete && whyLevel >= 5)) {
       if (conversation && !showCompletion) {
-      // Mark why sequence as complete
-      baseProgress.updateBaseProgress(conversation.id, 'second_base', {
-        why_sequence_complete: true,
-      });
-      
-      // Extract root fear from last assistant message of second sequence
-      const transitionIndex = messages.findIndex(m => 
-        m.content.includes('What are you afraid of')
-      );
-      const fearMessages = transitionIndex >= 0 
-        ? messages.slice(transitionIndex).filter(m => m.role === 'assistant')
-        : [];
-      const lastFearMessage = fearMessages
-        .filter(m => m.why_level === 5)
-        .pop();
-      
-      if (lastFearMessage?.content) {
-        saveRootInsight('root_fear', lastFearMessage.content);
-      }
-      
-        setShowCompletion(true);
+        const handleCompletion = async () => {
+          // Mark why sequence as complete
+          await baseProgress.updateBaseProgress(conversation.id, 'second_base', {
+            why_sequence_complete: true,
+          });
+          
+          // Extract root fear from last assistant message of second sequence
+          const transitionIndex = messages.findIndex(m => 
+            m.content.includes('What are you afraid of')
+          );
+          const fearMessages = transitionIndex >= 0 
+            ? messages.slice(transitionIndex).filter(m => m.role === 'assistant')
+            : [];
+          const lastFearMessage = fearMessages
+            .filter(m => m.why_level === 5)
+            .pop();
+          
+          const rootInsight = lastFearMessage?.content || '';
+          
+          if (rootInsight) {
+            await saveRootInsight('root_fear', rootInsight);
+          }
+
+          // Generate summary if we don't have one yet (combine both sequences)
+          if (!conversation.second_base_summary && messages.length > 0) {
+            setGeneratingSummary(true);
+            try {
+              const generatedSummary = await generateBreakthroughSummary(
+                messages,
+                'second_base',
+                rootInsight
+              );
+              setSummary(generatedSummary);
+              await saveSummary('second_base', generatedSummary);
+            } catch (error) {
+              console.error('Error generating summary:', error);
+            } finally {
+              setGeneratingSummary(false);
+            }
+          } else if (conversation.second_base_summary) {
+            setSummary(conversation.second_base_summary);
+          }
+          
+          setShowCompletion(true);
+        };
+
+        handleCompletion();
       }
     }
-  }, [isComplete, fearComplete, whyLevel, conversation, messages, showCompletion, saveRootInsight]);
+  }, [isComplete, fearComplete, whyLevel, conversation, messages, showCompletion, saveRootInsight, saveSummary]);
 
   const handleProceedToThirdBase = async () => {
     if (!conversation || proceeding) return;
@@ -225,34 +255,43 @@ What are you afraid of? What obstacles stand in your way? What fears hold you ba
         </div>
 
         {showCompletion && (
-          <div className="mt-6 bg-white rounded-loam shadow-lg p-8 border-2 border-loam-green">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-loam-green rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4">
-                ✓
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                You've Discovered WHAT You Want and What's Stopping You!
-              </h2>
-              <p className="text-gray-600 mb-6">
-                You've completed both 5 Whys sequences and discovered your deepest desires and fears. Ready to move to Third Base and map out HOW you'll make it happen?
-              </p>
-              <div className="flex gap-4 justify-center flex-wrap">
-                <button
-                  onClick={handleProceedToThirdBase}
-                  disabled={proceeding}
-                  className="bg-loam-green text-white px-8 py-4 rounded-loam text-lg font-semibold hover:bg-loam-green/90 focus:outline-none focus:ring-2 focus:ring-loam-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                >
-                  {proceeding ? 'Moving to Third Base...' : 'Proceed to Third Base'}
-                </button>
-                <button
-                  onClick={() => setShowCompletion(false)}
-                  className="bg-gray-200 text-gray-700 px-8 py-4 rounded-loam text-lg font-semibold hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition"
-                >
-                  Continue Exploring
-                </button>
+          <>
+            {(summary || generatingSummary) && (
+              <SummaryCard
+                summary={summary || ''}
+                baseStage="second_base"
+                loading={generatingSummary}
+              />
+            )}
+            <div className="mt-6 bg-white rounded-loam shadow-lg p-8 border-2 border-loam-green">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-loam-green rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4">
+                  ✓
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  You've Discovered WHAT You Want and What's Stopping You!
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  You've completed both 5 Whys sequences and discovered your deepest desires and fears. Ready to move to Third Base and map out HOW you'll make it happen?
+                </p>
+                <div className="flex gap-4 justify-center flex-wrap">
+                  <button
+                    onClick={handleProceedToThirdBase}
+                    disabled={proceeding}
+                    className="bg-loam-green text-white px-8 py-4 rounded-loam text-lg font-semibold hover:bg-loam-green/90 focus:outline-none focus:ring-2 focus:ring-loam-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    {proceeding ? 'Moving to Third Base...' : 'Proceed to Third Base'}
+                  </button>
+                  <button
+                    onClick={() => setShowCompletion(false)}
+                    className="bg-gray-200 text-gray-700 px-8 py-4 rounded-loam text-lg font-semibold hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition"
+                  >
+                    Continue Exploring
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>

@@ -36,6 +36,13 @@ export interface Conversation {
   root_legacy?: string;
   root_sustainability_threat?: string;
   
+  // Breakthrough summaries for each section
+  at_bat_summary?: string;
+  first_base_summary?: string;
+  second_base_summary?: string;
+  third_base_summary?: string;
+  home_plate_summary?: string;
+  
   // Final deliverables
   why_statement?: string;
   identity_statement?: string;

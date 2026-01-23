@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useConversation } from '@/hooks/useConversation';
 import { useChat } from '@/hooks/useChat';
+import { useBaseProgress } from '@/hooks/useBaseProgress';
 import ChatInterface from '@/components/chat/ChatInterface';
 import ProgressBar from '@/components/progress/ProgressBar';
 import WhyCounter from '@/components/progress/WhyCounter';
@@ -10,7 +11,7 @@ import SummaryCard from '@/components/progress/SummaryCard';
 import { baseProgress, messages as messagesApi } from '@/lib/supabase';
 import { downloadConversationPDF } from '@/utils/pdfExport';
 import { generateBreakthroughSummary } from '@/lib/anthropic';
-import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { ArrowDownTrayIcon, EyeIcon } from '@heroicons/react/24/outline';
 
 export default function ThirdBase() {
   const { user } = useAuth();
@@ -19,12 +20,26 @@ export default function ThirdBase() {
     conversation,
     baseStage: 'third_base',
   });
+  const { completedStages, isStageCompleted } = useBaseProgress(conversation?.id);
   const navigate = useNavigate();
   const [showCompletion, setShowCompletion] = useState(false);
   const [proceeding, setProceeding] = useState(false);
   const [initialMessageSent, setInitialMessageSent] = useState(false);
   const [summary, setSummary] = useState<string | null>(null);
   const [generatingSummary, setGeneratingSummary] = useState(false);
+  const [isReviewMode, setIsReviewMode] = useState(false);
+  const [allowContinue, setAllowContinue] = useState(false);
+
+  // Check if this stage is completed and should be in review mode
+  useEffect(() => {
+    if (conversation) {
+      const stageCompleted = isStageCompleted('third_base');
+      const isPastStage = conversation.current_base !== 'third_base' && 
+        ['home_plate', 'completed'].includes(conversation.current_base);
+      
+      setIsReviewMode(stageCompleted || isPastStage);
+    }
+  }, [conversation, isStageCompleted]);
 
   // Send initial message when conversation starts (only if no existing messages)
   useEffect(() => {
@@ -153,7 +168,24 @@ ${whyText ? `${whyText}\n\n` : ''}${whoText ? `${whoText}\n\n` : ''}${whatText ?
   return (
     <div className="min-h-screen bg-gradient-to-br from-loam-neutral to-loam-neutral px-4 py-8">
       <div className="max-w-6xl mx-auto">
-        <ProgressBar currentBase="third_base" />
+        {isReviewMode && !allowContinue && (
+          <div className="mb-6 bg-amber-50 border-2 border-amber-300 rounded-loam p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <EyeIcon className="w-6 h-6 text-amber-700" />
+              <div>
+                <h3 className="font-semibold text-amber-900">Reviewing Third Base - This conversation is complete</h3>
+                <p className="text-sm text-amber-700">You're viewing your completed conversation. You can review it or continue adding messages.</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setAllowContinue(true)}
+              className="px-4 py-2 bg-amber-600 text-white rounded-loam font-semibold hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition"
+            >
+              Continue this conversation
+            </button>
+          </div>
+        )}
+        <ProgressBar currentBase="third_base" completedStages={completedStages} />
         <WhyCounter currentLevel={whyLevel} />
         
         {/* Download Button */}
@@ -174,6 +206,8 @@ ${whyText ? `${whyText}\n\n` : ''}${whoText ? `${whoText}\n\n` : ''}${whatText ?
             messages={messages}
             loading={chatLoading}
             onSendMessage={sendMessage}
+            disabled={isReviewMode && !allowContinue}
+            disabledMessage="This conversation is complete. Click 'Continue Conversation' to add more messages."
           />
         </div>
 

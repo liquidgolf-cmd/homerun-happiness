@@ -1,12 +1,26 @@
+import { useNavigate } from 'react-router-dom';
 import { BaseStage } from '@/types/conversation';
 import { BASE_STAGES, PROGRESS_STEPS } from '@/utils/constants';
 import { CheckIcon } from '@heroicons/react/24/outline';
+import { CompletedStages } from '@/hooks/useBaseProgress';
 
 interface ProgressBarProps {
   currentBase: BaseStage;
+  completedStages?: CompletedStages;
+  onStageClick?: (stage: BaseStage) => void;
 }
 
-export default function ProgressBar({ currentBase }: ProgressBarProps) {
+const BASE_STAGE_ROUTES: Record<BaseStage, string> = {
+  at_bat: '/at-bat',
+  first_base: '/first-base',
+  second_base: '/second-base',
+  third_base: '/third-base',
+  home_plate: '/home-plate',
+  completed: '/report',
+};
+
+export default function ProgressBar({ currentBase, completedStages, onStageClick }: ProgressBarProps) {
+  const navigate = useNavigate();
   const progressPercentage = PROGRESS_STEPS[currentBase] || 0;
 
   const getBaseIndex = (base: BaseStage) => {
@@ -33,18 +47,36 @@ export default function ProgressBar({ currentBase }: ProgressBarProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-5 gap-3 mt-6">
         {BASE_STAGES.slice(0, 5).map((stage, index) => {
-          const isCompleted = index < currentIndex;
+          const isCompleted = completedStages 
+            ? completedStages[stage.key as keyof CompletedStages] || false
+            : index < currentIndex;
           const isCurrent = stage.key === currentBase;
+          const isClickable = isCompleted && !isCurrent;
+          const route = BASE_STAGE_ROUTES[stage.key];
+
+          const handleClick = () => {
+            if (isClickable && route) {
+              if (onStageClick) {
+                onStageClick(stage.key);
+              }
+              navigate(route);
+            }
+          };
 
           return (
             <div
               key={stage.key}
+              onClick={handleClick}
               className={`relative p-4 rounded-loam border-2 transition-all ${
                 isCurrent
                   ? 'border-loam-brown bg-loam-neutral ring-4 ring-loam-brown ring-opacity-20'
                   : isCompleted
                   ? 'border-loam-green bg-loam-highlight bg-opacity-10'
                   : 'border-gray-200 bg-loam-neutral bg-opacity-30'
+              } ${
+                isClickable 
+                  ? 'cursor-pointer hover:shadow-md hover:scale-105 hover:border-loam-green/50' 
+                  : ''
               }`}
             >
               <div className="flex items-center justify-between mb-2">

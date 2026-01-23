@@ -10,9 +10,11 @@ interface ChatInterfaceProps {
   messages: Message[];
   loading: boolean;
   onSendMessage: (content: string) => void;
+  disabled?: boolean;
+  disabledMessage?: string;
 }
 
-export default function ChatInterface({ messages, loading, onSendMessage }: ChatInterfaceProps) {
+export default function ChatInterface({ messages, loading, onSendMessage, disabled = false, disabledMessage }: ChatInterfaceProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { speakText, ttsEnabled } = useTTS();
   const lastMessageRef = useRef<string>('');
@@ -97,7 +99,13 @@ export default function ChatInterface({ messages, loading, onSendMessage }: Chat
         <div ref={messagesEndRef} />
       </div>
       
-      <InputBar onSend={onSendMessage} disabled={loading} />
+      {disabled && disabledMessage && (
+        <div className="px-6 py-3 bg-amber-50 border-t border-amber-200">
+          <p className="text-sm text-amber-800 text-center">{disabledMessage}</p>
+        </div>
+      )}
+      
+      <InputBar onSend={onSendMessage} disabled={loading || disabled} />
     </div>
   );
 }

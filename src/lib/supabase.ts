@@ -183,6 +183,15 @@ export const baseProgress = {
       .maybeSingle();
     return { data, error };
   },
+
+  async getAllBaseProgress(conversationId: string) {
+    const { data, error } = await supabase
+      .from('base_progress')
+      .select('*')
+      .eq('conversation_id', conversationId)
+      .order('base_stage', { ascending: true });
+    return { data, error };
+  },
 };
 
 // Pre-assessment helpers

@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useConversation } from '@/hooks/useConversation';
+import LogoutLink from '@/components/auth/LogoutLink';
 import { messages as messagesApi } from '@/lib/supabase';
 import { downloadFullJourneyPDF } from '@/utils/pdfExport';
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { Message } from '@/types/conversation';
 
 export default function Report() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { conversation, loading } = useConversation(user?.id);
   const navigate = useNavigate();
   const [allMessages, setAllMessages] = useState<Message[]>([]);
@@ -335,17 +336,9 @@ export default function Report() {
             </div>
           </div>
 
-          {/* Logout */}
+          {/* Logout – sends user to pre-assessment so they can take it again */}
           <div className="text-center">
-            <button
-              onClick={async () => {
-                await logout();
-                navigate('/login');
-              }}
-              className="text-gray-600 hover:text-gray-900 transition"
-            >
-              Sign Out
-            </button>
+            <LogoutLink label="Log out" />
           </div>
         </div>
       </div>

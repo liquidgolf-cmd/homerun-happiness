@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useConversation } from '@/hooks/useConversation';
 import { JourneyType } from '@/types/conversation';
 import { getRedirectPath } from '@/utils/routing';
+import LogoutLink from '@/components/auth/LogoutLink';
 
 export default function PathSelection() {
   const { user, loading: authLoading } = useAuth();
@@ -100,6 +101,11 @@ export default function PathSelection() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-loam-neutral to-loam-neutral px-4 py-12">
       <div className="max-w-4xl mx-auto">
+        {user && (
+          <div className="flex justify-end mb-4">
+            <LogoutLink />
+          </div>
+        )}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Choose Your Path</h1>
           <p className="text-gray-600">

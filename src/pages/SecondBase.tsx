@@ -12,6 +12,7 @@ import { baseProgress, messages as messagesApi } from '@/lib/supabase';
 import { downloadConversationPDF } from '@/utils/pdfExport';
 import { generateBreakthroughSummary } from '@/lib/anthropic';
 import { ArrowDownTrayIcon, EyeIcon } from '@heroicons/react/24/outline';
+import LogoutLink from '@/components/auth/LogoutLink';
 
 export default function SecondBase() {
   const { user } = useAuth();
@@ -240,6 +241,9 @@ What are you afraid of? What obstacles stand in your way? What fears hold you ba
   return (
     <div className="min-h-screen bg-gradient-to-br from-loam-neutral to-loam-neutral px-4 py-8">
       <div className="max-w-6xl mx-auto">
+        <div className="flex justify-end mb-4">
+          <LogoutLink />
+        </div>
         {isReviewMode && !allowContinue && (
           <div className="mb-6 bg-amber-50 border-2 border-amber-300 rounded-loam p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -306,7 +310,7 @@ What are you afraid of? What obstacles stand in your way? What fears hold you ba
                   You've Discovered WHAT You Want and What's Stopping You!
                 </h2>
                 <p className="text-gray-600 mb-6">
-                  You've completed both 5 Whys sequences and discovered your deepest desires and fears. Ready to move to Third Base and map out HOW you'll make it happen?
+                  You've completed this step of the HomeRun framework and discovered your deepest desires and fears. Ready to move to Third Base and map out HOW you'll make it happen?
                 </p>
                 <div className="flex gap-4 justify-center flex-wrap">
                   <button

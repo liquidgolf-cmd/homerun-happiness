@@ -12,6 +12,7 @@ import { baseProgress, messages as messagesApi } from '@/lib/supabase';
 import { downloadConversationPDF } from '@/utils/pdfExport';
 import { generateBreakthroughSummary } from '@/lib/anthropic';
 import { ArrowDownTrayIcon, EyeIcon } from '@heroicons/react/24/outline';
+import LogoutLink from '@/components/auth/LogoutLink';
 
 export default function AtBat() {
   const { user } = useAuth();
@@ -164,6 +165,9 @@ Here's my first question: What do you want? Be specific - don't give me generic 
   return (
     <div className="min-h-screen bg-loam-neutral px-4 py-8">
       <div className="max-w-6xl mx-auto">
+        <div className="flex justify-end mb-4">
+          <LogoutLink />
+        </div>
         {isReviewMode && !allowContinue && (
           <div className="mb-6 bg-amber-50 border-2 border-amber-300 rounded-loam p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -225,7 +229,7 @@ Here's my first question: What do you want? Be specific - don't give me generic 
                   You've Discovered Your WHY!
                 </h2>
                 <p className="text-gray-600 mb-6">
-                  You've completed the 5 Whys and discovered your deepest motivation. Ready to move to First Base and discover WHO you really are?
+                  You've reached the root and discovered your deepest motivation. Ready to move to First Base and discover WHO you really are?
                 </p>
                 <div className="flex gap-4 justify-center flex-wrap">
                   <button

@@ -12,6 +12,7 @@ import { baseProgress, messages as messagesApi } from '@/lib/supabase';
 import { downloadConversationPDF } from '@/utils/pdfExport';
 import { generateBreakthroughSummary } from '@/lib/anthropic';
 import { ArrowDownTrayIcon, EyeIcon } from '@heroicons/react/24/outline';
+import LogoutLink from '@/components/auth/LogoutLink';
 
 export default function FirstBase() {
   const { user } = useAuth();
@@ -164,6 +165,9 @@ Here's my question: When you strip away your job title, your roles, and what oth
   return (
     <div className="min-h-screen bg-gradient-to-br from-loam-neutral to-loam-neutral px-4 py-8">
       <div className="max-w-6xl mx-auto">
+        <div className="flex justify-end mb-4">
+          <LogoutLink />
+        </div>
         {isReviewMode && !allowContinue && (
           <div className="mb-6 bg-amber-50 border-2 border-amber-300 rounded-loam p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -225,7 +229,7 @@ Here's my question: When you strip away your job title, your roles, and what oth
                   You've Discovered WHO You Really Are!
                 </h2>
                 <p className="text-gray-600 mb-6">
-                  You've completed the 5 Whys and discovered your authentic identity. Ready to move to Second Base and discover WHAT you truly want and what's stopping you?
+                  You've reached the root and discovered your authentic identity. Ready to move to Second Base and discover WHAT you truly want and what's stopping you?
                 </p>
                 <div className="flex gap-4 justify-center flex-wrap">
                   <button

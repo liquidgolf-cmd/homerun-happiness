@@ -61,19 +61,20 @@ export default function Assessment() {
 
     try {
       const recommendedPath = calculateRecommendedPath();
-      
-      // Try to save assessment, but continue even if it fails
-      await preAssessments.createPreAssessment({
-        user_id: user?.id,
-        email: user?.email || '',
-        happiness_score: happinessScore,
-        clarity_score: clarityScore,
-        readiness_score: readinessScore,
-        biggest_challenge: biggestChallenge,
-        recommended_path: recommendedPath,
-      });
 
-      // Always navigate to path selection regardless of save status
+      // Save to DB only when logged in (anonymous pre-assessment skips save)
+      if (user?.id) {
+        await preAssessments.createPreAssessment({
+          user_id: user.id,
+          email: user.email || '',
+          happiness_score: happinessScore,
+          clarity_score: clarityScore,
+          readiness_score: readinessScore,
+          biggest_challenge: biggestChallenge,
+          recommended_path: recommendedPath,
+        });
+      }
+
       navigate('/path-selection', {
         state: {
           happinessScore,

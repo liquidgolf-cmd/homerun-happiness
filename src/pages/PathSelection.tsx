@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useConversation } from '@/hooks/useConversation';
 import { JourneyType } from '@/types/conversation';
@@ -20,6 +20,13 @@ export default function PathSelection() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [checkingProgress, setCheckingProgress] = useState(true);
+
+  // Anonymous user with no state: send back to pre-assessment
+  useEffect(() => {
+    if (!authLoading && !user && recommendedPath == null) {
+      navigate('/assessment', { replace: true });
+    }
+  }, [authLoading, user, recommendedPath, navigate]);
 
   // Auto-redirect if user has already started a conversation
   useEffect(() => {
@@ -73,8 +80,13 @@ export default function PathSelection() {
     }
   };
 
-  // Show loading state while checking progress
-  if (checkingProgress || authLoading || convLoading) {
+  // Anonymous with no state: redirecting to pre-assessment
+  if (!user && recommendedPath == null) {
+    return null;
+  }
+
+  // Show loading state while checking progress (only when logged in)
+  if (user && (checkingProgress || authLoading || convLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -96,6 +108,26 @@ export default function PathSelection() {
             </strong>
           </p>
         </div>
+
+        {!user && (
+          <div className="mb-6 bg-loam-neutral border border-loam-clay/30 rounded-loam px-4 py-3 text-gray-700 text-center">
+            <p className="font-medium mb-2">Sign up or log in to continue your journey</p>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Link
+                to="/signup"
+                className="inline-block bg-loam-brown text-white px-4 py-2 rounded-loam font-medium hover:bg-loam-brown/90"
+              >
+                Sign up
+              </Link>
+              <Link
+                to="/login"
+                className="inline-block border border-loam-brown text-loam-brown px-4 py-2 rounded-loam font-medium hover:bg-loam-brown/5"
+              >
+                Log in
+              </Link>
+            </div>
+          </div>
+        )}
 
         {error && (
           <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-loam text-sm">

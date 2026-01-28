@@ -72,6 +72,56 @@ export default function Purchase() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const fillDummyData = () => {
+    setBillingName('John Doe');
+    setBillingEmail(user?.email || 'test@example.com');
+    setBillingAddress('123 Main St');
+    setBillingCity('San Francisco');
+    setBillingState('CA');
+    setBillingZip('94102');
+    setBillingCountry('United States');
+    setCardNumber('4242 4242 4242 4242');
+    setCardExpiry('12/25');
+    setCardCvv('123');
+    setCardholderName('John Doe');
+  };
+
+  const proceedToAtBat = async () => {
+    // Check if user is authenticated
+    if (!user) {
+      navigate('/login', { state: { from: '/purchase' } });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Fetch pre-assessment to get journey type
+      const { data: preAssessment } = await preAssessments.getPreAssessment(user.id);
+      
+      // Determine journey type from pre-assessment or default to 'personal'
+      const journeyType: JourneyType = (preAssessment?.recommended_path as JourneyType) || 'personal';
+
+      // Ensure conversation exists (create if needed)
+      if (!conversation) {
+        const { error: convError } = await startNewConversation(journeyType);
+        if (convError) {
+          console.error('Failed to create conversation:', convError);
+          // Still redirect - AtBat will handle missing conversation gracefully
+        }
+      }
+
+      // Redirect to AtBat to begin coaching journey
+      navigate('/at-bat');
+    } catch (error) {
+      console.error('Error setting up conversation:', error);
+      // Still redirect - AtBat will handle errors gracefully
+      navigate('/at-bat');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
@@ -93,7 +143,8 @@ export default function Purchase() {
     // 3. Confirm payment with Stripe Elements: await stripe.confirmCardPayment(clientSecret, { payment_method: { card: cardElement } });
     // 4. Handle success/error and redirect to success page or show error
 
-    // For now: simulate processing delay
+    // TODO: Replace with Stripe payment processing
+    // For now: simulate processing delay, then proceed to AtBat
     setTimeout(async () => {
       const formData = {
         billing: {
@@ -114,32 +165,9 @@ export default function Purchase() {
       };
       
       console.log('Form data (ready for Stripe):', formData);
-
-      try {
-        // Fetch pre-assessment to get journey type
-        const { data: preAssessment } = await preAssessments.getPreAssessment(user.id);
-        
-        // Determine journey type from pre-assessment or default to 'personal'
-        const journeyType: JourneyType = (preAssessment?.recommended_path as JourneyType) || 'personal';
-
-        // Ensure conversation exists (create if needed)
-        if (!conversation) {
-          const { error: convError } = await startNewConversation(journeyType);
-          if (convError) {
-            console.error('Failed to create conversation:', convError);
-            // Still redirect - AtBat will handle missing conversation gracefully
-          }
-        }
-
-        // Redirect to AtBat to begin coaching journey
-        navigate('/at-bat');
-      } catch (error) {
-        console.error('Error setting up conversation:', error);
-        // Still redirect - AtBat will handle errors gracefully
-        navigate('/at-bat');
-      } finally {
-        setLoading(false);
-      }
+      
+      // Proceed to AtBat after processing
+      await proceedToAtBat();
     }, 1500);
   };
 
@@ -416,6 +444,23 @@ export default function Purchase() {
               >
                 {loading ? 'Processing...' : `Complete purchase — $${OFFER_PRICE}`}
               </button>
+
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => {
+                    fillDummyData();
+                    proceedToAtBat();
+                  }}
+                  disabled={loading}
+                  className="w-full bg-loam-green text-white py-3 px-6 rounded-loam text-base font-medium hover:bg-loam-green/90 focus:outline-none focus:ring-2 focus:ring-loam-green focus:ring-offset-2 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Quick Start with Dummy Data
+                </button>
+                <p className="mt-2 text-center text-xs text-gray-500">
+                  Skip form and start coaching immediately (for testing)
+                </p>
+              </div>
 
               <Link to="/" className="mt-4 block text-center text-gray-500 hover:text-gray-700 text-sm">
                 Cancel

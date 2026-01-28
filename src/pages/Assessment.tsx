@@ -1,6 +1,8 @@
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, useEffect, FormEvent, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { MicrophoneIcon, StopIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/hooks/useAuth';
+import { useDictation } from '@/hooks/useDictation';
 import { preAssessments } from '@/lib/supabase';
 import { getRedirectPath } from '@/utils/routing';
 
@@ -21,6 +23,20 @@ export default function Assessment() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [checkingProgress, setCheckingProgress] = useState(true);
+
+  const appendChallenge = useCallback((text: string) => {
+    setBiggestChallenge((prev) => (prev ? `${prev} ${text}` : text));
+  }, []);
+  const appendWhyMatters = useCallback((text: string) => {
+    setWhyMatters((prev) => (prev ? `${prev} ${text}` : text));
+  }, []);
+  const appendWhatWouldChange = useCallback((text: string) => {
+    setWhatWouldChange((prev) => (prev ? `${prev} ${text}` : text));
+  }, []);
+
+  const { isListening: listeningChallenge, speechSupported, toggleMic: toggleMicChallenge } = useDictation(appendChallenge);
+  const { isListening: listeningWhy, toggleMic: toggleMicWhy } = useDictation(appendWhyMatters);
+  const { isListening: listeningWhat, toggleMic: toggleMicWhat } = useDictation(appendWhatWouldChange);
 
   const recommendedPath = happinessScore + clarityScore + readinessScore < 15 ? 'business' : 'personal';
 
@@ -170,7 +186,25 @@ export default function Assessment() {
               </div>
               <div>
                 <label htmlFor="challenge" className="block text-lg font-semibold text-gray-900 mb-3">What&apos;s your biggest challenge right now?</label>
-                <textarea id="challenge" value={biggestChallenge} onChange={(e) => setBiggestChallenge(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-loam focus:ring-2 focus:ring-loam-brown focus:border-transparent resize-none" rows={4} placeholder="Tell us what's holding you back or what you're struggling with most..." required />
+                <div className="flex gap-2 items-end">
+                  <textarea id="challenge" value={biggestChallenge} onChange={(e) => setBiggestChallenge(e.target.value)} className="flex-1 min-h-[100px] px-4 py-3 border border-gray-300 rounded-loam focus:ring-2 focus:ring-loam-brown focus:border-transparent resize-none" rows={4} placeholder="Tell us what's holding you back or what you're struggling with most... Type or use the mic to dictate." required />
+                  <button
+                    type="button"
+                    onClick={toggleMicChallenge}
+                    disabled={!speechSupported}
+                    aria-label={!speechSupported ? 'Dictation not supported' : listeningChallenge ? 'Stop dictation' : 'Start dictation'}
+                    title={!speechSupported ? 'Dictation not supported' : listeningChallenge ? 'Stop dictation' : 'Dictate'}
+                    className={`flex-shrink-0 flex items-center justify-center gap-1.5 min-w-[4rem] h-12 px-3 rounded-loam font-medium transition ${
+                      listeningChallenge
+                        ? 'bg-red-500 text-white hover:bg-red-600 focus:ring-2 focus:ring-red-400 focus:ring-offset-2'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-loam-brown focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
+                    }`}
+                  >
+                    {listeningChallenge ? <StopIcon className="w-5 h-5 shrink-0" aria-hidden /> : <MicrophoneIcon className="w-5 h-5 shrink-0" aria-hidden />}
+                    <span className="text-xs font-semibold whitespace-nowrap">{listeningChallenge ? 'Stop' : 'Mic'}</span>
+                  </button>
+                </div>
+                {listeningChallenge && <p className="mt-1 text-xs text-red-600 font-medium" role="status">Listening… speak now. Click the mic again to stop.</p>}
               </div>
               {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-loam text-sm">{error}</div>}
               <button type="submit" className="w-full bg-loam-brown text-white py-4 px-6 rounded-loam text-lg font-semibold hover:bg-loam-brown/90 focus:outline-none focus:ring-2 focus:ring-loam-brown focus:ring-offset-2 transition">Continue</button>
@@ -188,11 +222,47 @@ export default function Assessment() {
             <form onSubmit={handlePage2Submit} className="space-y-6">
               <div>
                 <label htmlFor="why-matters" className="block text-lg font-semibold text-gray-900 mb-2">Why does addressing this challenge matter to you?</label>
-                <textarea id="why-matters" value={whyMatters} onChange={(e) => setWhyMatters(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-loam focus:ring-2 focus:ring-loam-brown focus:border-transparent resize-none" rows={4} placeholder="What's at stake for you?" required />
+                <div className="flex gap-2 items-end">
+                  <textarea id="why-matters" value={whyMatters} onChange={(e) => setWhyMatters(e.target.value)} className="flex-1 min-h-[100px] px-4 py-3 border border-gray-300 rounded-loam focus:ring-2 focus:ring-loam-brown focus:border-transparent resize-none" rows={4} placeholder="What's at stake for you? Type or use the mic to dictate." required />
+                  <button
+                    type="button"
+                    onClick={toggleMicWhy}
+                    disabled={!speechSupported}
+                    aria-label={!speechSupported ? 'Dictation not supported' : listeningWhy ? 'Stop dictation' : 'Start dictation'}
+                    title={!speechSupported ? 'Dictation not supported' : listeningWhy ? 'Stop dictation' : 'Dictate'}
+                    className={`flex-shrink-0 flex items-center justify-center gap-1.5 min-w-[4rem] h-12 px-3 rounded-loam font-medium transition ${
+                      listeningWhy
+                        ? 'bg-red-500 text-white hover:bg-red-600 focus:ring-2 focus:ring-red-400 focus:ring-offset-2'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-loam-brown focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
+                    }`}
+                  >
+                    {listeningWhy ? <StopIcon className="w-5 h-5 shrink-0" aria-hidden /> : <MicrophoneIcon className="w-5 h-5 shrink-0" aria-hidden />}
+                    <span className="text-xs font-semibold whitespace-nowrap">{listeningWhy ? 'Stop' : 'Mic'}</span>
+                  </button>
+                </div>
+                {listeningWhy && <p className="mt-1 text-xs text-red-600 font-medium" role="status">Listening… speak now. Click the mic again to stop.</p>}
               </div>
               <div>
                 <label htmlFor="what-would-change" className="block text-lg font-semibold text-gray-900 mb-2">What would be different in your life if you could overcome it?</label>
-                <textarea id="what-would-change" value={whatWouldChange} onChange={(e) => setWhatWouldChange(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-loam focus:ring-2 focus:ring-loam-brown focus:border-transparent resize-none" rows={4} placeholder="Imagine the impact..." />
+                <div className="flex gap-2 items-end">
+                  <textarea id="what-would-change" value={whatWouldChange} onChange={(e) => setWhatWouldChange(e.target.value)} className="flex-1 min-h-[100px] px-4 py-3 border border-gray-300 rounded-loam focus:ring-2 focus:ring-loam-brown focus:border-transparent resize-none" rows={4} placeholder="Imagine the impact... Type or use the mic to dictate." />
+                  <button
+                    type="button"
+                    onClick={toggleMicWhat}
+                    disabled={!speechSupported}
+                    aria-label={!speechSupported ? 'Dictation not supported' : listeningWhat ? 'Stop dictation' : 'Start dictation'}
+                    title={!speechSupported ? 'Dictation not supported' : listeningWhat ? 'Stop dictation' : 'Dictate'}
+                    className={`flex-shrink-0 flex items-center justify-center gap-1.5 min-w-[4rem] h-12 px-3 rounded-loam font-medium transition ${
+                      listeningWhat
+                        ? 'bg-red-500 text-white hover:bg-red-600 focus:ring-2 focus:ring-red-400 focus:ring-offset-2'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-loam-brown focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
+                    }`}
+                  >
+                    {listeningWhat ? <StopIcon className="w-5 h-5 shrink-0" aria-hidden /> : <MicrophoneIcon className="w-5 h-5 shrink-0" aria-hidden />}
+                    <span className="text-xs font-semibold whitespace-nowrap">{listeningWhat ? 'Stop' : 'Mic'}</span>
+                  </button>
+                </div>
+                {listeningWhat && <p className="mt-1 text-xs text-red-600 font-medium" role="status">Listening… speak now. Click the mic again to stop.</p>}
               </div>
               {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-loam text-sm">{error}</div>}
               <div className="flex gap-3">

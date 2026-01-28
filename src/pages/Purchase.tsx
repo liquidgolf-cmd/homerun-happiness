@@ -87,17 +87,23 @@ export default function Purchase() {
   };
 
   const proceedToAtBat = async () => {
-    // Check if user is authenticated
-    if (!user) {
-      navigate('/login', { state: { from: '/purchase' } });
+    // ProtectedRoute ensures user is authenticated, but verify before proceeding
+    if (!user?.id) {
+      console.error('User not authenticated in proceedToAtBat - this should not happen with ProtectedRoute');
+      // Don't redirect here - ProtectedRoute will handle it
+      // Just return and let the component handle the auth state
+      setLoading(false);
       return;
     }
 
     setLoading(true);
 
     try {
+      // Store user.id in a variable to ensure we have a stable reference
+      const userId = user.id;
+      
       // Fetch pre-assessment to get journey type
-      const { data: preAssessment } = await preAssessments.getPreAssessment(user.id);
+      const { data: preAssessment } = await preAssessments.getPreAssessment(userId);
       
       // Determine journey type from pre-assessment or default to 'personal'
       const journeyType: JourneyType = (preAssessment?.recommended_path as JourneyType) || 'personal';
@@ -129,9 +135,10 @@ export default function Purchase() {
       return;
     }
 
-    // Check if user is authenticated
-    if (!user) {
-      navigate('/login', { state: { from: '/purchase' } });
+    // ProtectedRoute ensures user is authenticated, but verify before proceeding
+    if (!user?.id) {
+      console.error('User not authenticated in handleSubmit - this should not happen with ProtectedRoute');
+      // Don't redirect here - ProtectedRoute will handle it
       return;
     }
 

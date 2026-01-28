@@ -34,9 +34,9 @@ export interface CoachingContext {
 }
 
 const BASE_INSTRUCTIONS: Record<BaseStage, string> = {
-  at_bat: `You're helping the user discover their deepest WHY - their core motivation for everything they do. This is the foundation of their journey. Ask "why" questions that dig into their motivation, values, and what truly drives them.`,
+  at_bat: `You're helping the user discover their deepest WHY - their core motivation for everything they do. This is the foundation of their journey. Use the HomeRun framework to dig into their motivation, values, and what truly drives them.`,
   first_base: `You're helping the user discover WHO they really are - their authentic identity beyond roles and labels. Who are they at their core? What makes them uniquely them?`,
-  second_base: `You're helping the user discover WHAT they truly want and what's stopping them. This involves two 5 Whys sequences - one for desires, one for fears/obstacles.`,
+  second_base: `You're helping the user discover WHAT they truly want and what's stopping them. This involves two deep-question sequences - one for desires, one for fears/obstacles.`,
   third_base: `You're helping the user create a sustainable action plan - HOW they'll actually move forward. What are the concrete steps? What obstacles will they face?`,
   home_plate: `You're helping the user understand WHY IT MATTERS - the ripple effect and sustainability of their journey. What's the legacy? What makes it sustainable?`,
   completed: `The journey is complete. Celebrate their insights and growth.`,
@@ -73,9 +73,9 @@ export async function generateCoachResponse(
 Current Stage: ${baseInfo?.label || baseStage} - ${baseInfo?.description || ''}
 ${baseInstruction}
 
-You're at Why Level ${whyLevel} of 5. Each "why" should go deeper than the last. By level 5, you should reach the root cause or deepest truth.
+You're at depth ${whyLevel} in the HomeRun framework. Each exchange should go deeper than the last until you reach the root cause or deepest truth.
 
-${whyLevel < 5 ? `Ask the next "why" question. Make it more specific and deeper than before.` : `You've reached the 5th "why" - summarize the root insight they've discovered.`}
+${whyLevel < 5 ? `Ask the next depth question – make it more specific and deeper than before.` : `You've reached the root – summarize the core insight they've discovered.`}
 
 ${shouldEvaluateCompletion ? `
 IMPORTANT - Completion Suggestion:
@@ -86,7 +86,7 @@ Evaluate if the user has discovered a genuine root insight. If their answer reve
 3. Suggest next step (but don't force it): "Ready to move forward? ${nextBaseGuidance}? Or would you like to explore this deeper?"
 4. Keep it concise, celebratory, and inviting - let them choose to continue or move on
 
-If the insight isn't deep enough yet, continue asking "why" to dig deeper.
+If the insight isn't deep enough yet, use the HomeRun framework to go deeper.
 ` : ''}
 
 ${baseStage === 'second_base' ? `
@@ -221,6 +221,64 @@ Write the summary now. Do not include any meta-commentary or instructions - just
     return content.text.trim();
   } catch (error) {
     console.error('Error generating breakthrough summary:', error);
+    throw error;
+  }
+}
+
+export interface PreAssessmentSnapshotParams {
+  happinessScore: number;
+  clarityScore: number;
+  readinessScore: number;
+  biggestChallenge: string;
+  whyMatters: string;
+  whatWouldChange: string;
+  recommendedPath: 'business' | 'personal';
+}
+
+export async function generatePreAssessmentSnapshot(params: PreAssessmentSnapshotParams): Promise<string> {
+  if (!anthropic) {
+    throw new Error('Anthropic API key not configured');
+  }
+
+  const pathLabel = params.recommendedPath === 'business' ? 'Business Journey' : 'Personal Life Journey';
+
+  const systemPrompt = `You are a thoughtful life coach using the HomeRun framework. Your task is to write a "HomeRun Snapshot" from a pre-assessment. Use the same reflective, WHY-focused style as the "at bat" breakthrough summary: warm, second person ("you"), interpretive—not a repeat of their answers.
+
+Do NOT simply restate scores and answers. Instead:
+1. Synthesize what they shared into themes (their challenge, what's at stake, the change they imagine).
+2. Offer brief interpretation: what this suggests about their motivation, readiness, or what to work on first.
+3. Give 1–2 concrete, helpful takeaways or focus areas for their next steps.
+Use the HomeRun "at bat / why" lens: connection to motivation, values, and what truly matters.
+Tone: warm, celebratory but grounded. Length: approximately 200–300 words, 2–3 paragraphs.
+Output only the snapshot text. No meta-commentary, headers, or instructions.`;
+
+  const userContent = `Pre-assessment inputs:
+- Happiness (1–10): ${params.happinessScore}
+- Clarity on goals (1–10): ${params.clarityScore}
+- Readiness to change (1–10): ${params.readinessScore}
+- Biggest challenge: ${params.biggestChallenge}
+- Why it matters to them: ${params.whyMatters}
+${params.whatWouldChange ? `- What would change if they overcame it: ${params.whatWouldChange}` : ''}
+- Recommended path: ${pathLabel}
+
+Write the HomeRun Snapshot now.`;
+
+  try {
+    const response = await anthropic.messages.create({
+      model,
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userContent }],
+    });
+
+    const content = response.content[0];
+    if (content.type !== 'text') {
+      throw new Error('Unexpected response type from Anthropic API');
+    }
+
+    return content.text.trim();
+  } catch (error) {
+    console.error('Error generating pre-assessment snapshot:', error);
     throw error;
   }
 }

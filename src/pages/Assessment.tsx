@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { MicrophoneIcon, StopIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/hooks/useAuth';
 import { useDictation } from '@/hooks/useDictation';
+import { generatePreAssessmentSnapshot } from '@/lib/anthropic';
 import { preAssessments } from '@/lib/supabase';
 import { getRedirectPath } from '@/utils/routing';
 
@@ -23,6 +24,9 @@ export default function Assessment() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [checkingProgress, setCheckingProgress] = useState(true);
+  const [aiSnapshotText, setAiSnapshotText] = useState<string | null>(null);
+  const [generatingSnapshot, setGeneratingSnapshot] = useState(false);
+  const [snapshotError, setSnapshotError] = useState<string | null>(null);
 
   const appendChallenge = useCallback((text: string) => {
     setBiggestChallenge((prev) => (prev ? `${prev} ${text}` : text));
@@ -61,6 +65,31 @@ export default function Assessment() {
     checkProgress();
   }, [user?.id, authLoading, navigate]);
 
+  useEffect(() => {
+    if (step !== 'summary' || aiSnapshotText !== null || generatingSnapshot) return;
+    setGeneratingSnapshot(true);
+    setSnapshotError(null);
+    generatePreAssessmentSnapshot({
+      happinessScore,
+      clarityScore,
+      readinessScore,
+      biggestChallenge,
+      whyMatters,
+      whatWouldChange,
+      recommendedPath,
+    })
+      .then((text) => {
+        setAiSnapshotText(text);
+        setSnapshotError(null);
+      })
+      .catch(() => {
+        setSnapshotError('We couldn\'t generate an AI summary. Showing your answers instead.');
+      })
+      .finally(() => {
+        setGeneratingSnapshot(false);
+      });
+  }, [step, aiSnapshotText, generatingSnapshot, happinessScore, clarityScore, readinessScore, biggestChallenge, whyMatters, whatWouldChange, recommendedPath]);
+
   const handlePage1Submit = (e: FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -79,6 +108,8 @@ export default function Assessment() {
       return;
     }
     setLoading(true);
+    setAiSnapshotText(null);
+    setSnapshotError(null);
     try {
       if (user?.id) {
         await preAssessments.createPreAssessment({
@@ -109,7 +140,7 @@ export default function Assessment() {
     setLoading(true);
     try {
       // TODO: send HomeRun Snapshot email via your backend (e.g. Resend, SendGrid, Supabase Edge Function)
-      // await sendSnapshotEmail({ name: snapshotName, email: snapshotEmail, summary: buildSummaryText() });
+      // await sendSnapshotEmail({ name: snapshotName, email: snapshotEmail, summary: aiSnapshotText ?? buildSummaryText() });
       setStep('snapshot-sent');
     } catch (err) {
       setError('Something went wrong. Please try again.');
@@ -280,11 +311,35 @@ export default function Assessment() {
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Your HomeRun Snapshot</h1>
               <p className="text-gray-600">Here&apos;s a snapshot based on what you shared</p>
             </div>
-            <div className="mb-8 p-6 bg-loam-neutral rounded-loam border border-loam-clay/20 text-gray-700 leading-relaxed whitespace-pre-wrap">
-              {buildSummaryText()}
+            <div className="mb-6 p-6 bg-loam-neutral rounded-loam border border-loam-clay/20 text-gray-700 leading-relaxed whitespace-pre-wrap">
+              {generatingSnapshot ? (
+                <div className="flex flex-col items-center justify-center py-8 text-gray-600">
+                  <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-loam-brown mb-4" />
+                  <p>Generating your snapshot…</p>
+                </div>
+              ) : snapshotError && !aiSnapshotText ? (
+                <>
+                  {snapshotError && <p className="text-sm text-amber-700 mb-3">{snapshotError}</p>}
+                  {buildSummaryText()}
+                </>
+              ) : (
+                aiSnapshotText ?? buildSummaryText()
+              )}
+            </div>
+            <div className="mb-8 p-6 bg-loam-neutral rounded-loam border border-loam-clay/20 text-left">
+              <h2 className="text-lg font-semibold text-gray-900 mb-3">What you get when you continue</h2>
+              <p className="text-gray-700 mb-3">The full HomeRun program builds on this snapshot with AI coaching through every step of the framework:</p>
+              <ul className="list-disc list-inside text-gray-700 space-y-2 mb-0">
+                <li><strong>Deeper WHY discovery</strong> — Unpack your core motivation with guided “why” conversations (At Bat).</li>
+                <li><strong>WHO you really are</strong> — Move beyond roles to your authentic identity (First Base).</li>
+                <li><strong>WHAT you want & what&apos;s in the way</strong> — Clarify desires and name fears or obstacles (Second Base).</li>
+                <li><strong>HOW you&apos;ll move forward</strong> — A concrete action plan and ways to stay on track (Third Base).</li>
+                <li><strong>Why it MATTERS</strong> — Legacy, sustainability, and the ripple effect of your journey (Home Plate).</li>
+                <li><strong>Your full journey report</strong> — A personalized summary and breakthroughs you can keep.</li>
+              </ul>
             </div>
             <div className="space-y-4">
-              <button type="button" onClick={() => setStep('snapshot')} className="w-full bg-loam-brown text-white py-4 px-6 rounded-loam text-lg font-semibold hover:bg-loam-brown/90 focus:outline-none focus:ring-2 focus:ring-loam-brown focus:ring-offset-2 transition">
+              <button type="button" onClick={() => setStep('snapshot')} disabled={generatingSnapshot} className="w-full bg-loam-brown text-white py-4 px-6 rounded-loam text-lg font-semibold hover:bg-loam-brown/90 focus:outline-none focus:ring-2 focus:ring-loam-brown focus:ring-offset-2 transition disabled:opacity-50 disabled:cursor-not-allowed">
                 Get your HomeRun Snapshot by email
               </button>
               <button type="button" onClick={() => navigate('/path-selection', { state: { happinessScore, clarityScore, readinessScore, biggestChallenge, whyMatters, whatWouldChange, recommendedPath } })} className="w-full py-3 text-gray-600 hover:text-gray-900 font-medium">

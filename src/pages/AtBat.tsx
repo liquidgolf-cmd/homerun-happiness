@@ -17,6 +17,7 @@ import LogoutLink from '@/components/auth/LogoutLink';
 export default function AtBat() {
   const { user } = useAuth();
   const { conversation, loading: convLoading, saveRootInsight, saveSummary, updateBase } = useConversation(user?.id);
+  const [preAssessment, setPreAssessment] = useState<{ biggest_challenge: string; why_matters?: string; what_would_change?: string } | null>(null);
   const { messages, loading: chatLoading, loaded: chatLoaded, whyLevel, isComplete, sendMessage, reload } = useChat({
     conversation,
     baseStage: 'at_bat',
@@ -31,7 +32,6 @@ export default function AtBat() {
   const [generatingSummary, setGeneratingSummary] = useState(false);
   const [isReviewMode, setIsReviewMode] = useState(false);
   const [allowContinue, setAllowContinue] = useState(false);
-  const [preAssessment, setPreAssessment] = useState<{ biggest_challenge: string; why_matters?: string; what_would_change?: string } | null>(null);
 
   // Fetch pre-assessment for priming (P2)
   useEffect(() => {

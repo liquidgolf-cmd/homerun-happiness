@@ -353,7 +353,7 @@ export default function Assessment() {
             <div className="mb-8 p-6 bg-loam-neutral rounded-loam border-2 border-loam-brown/30 text-left">
               <h2 className="text-lg font-semibold text-gray-900 mb-3">Your snapshot is just the start. Here&apos;s what the full program adds.</h2>
               <p className="text-gray-700 mb-3">The full HomeRun program builds on this with AI coaching through every base.</p>
-              <ul className="list-disc list-inside text-gray-700 space-y-2 mb-0">
+              <ul className="list-disc list-inside text-gray-700 space-y-2 mb-6">
                 <li><strong>Deeper WHY discovery</strong> — Unpack what really drives you (At Bat).</li>
                 <li><strong>WHO you really are</strong> — Get beyond roles to your core identity (First Base).</li>
                 <li><strong>WHAT you want & what&apos;s in the way</strong> — Clarify desires and name fears or obstacles (Second Base).</li>
@@ -361,16 +361,22 @@ export default function Assessment() {
                 <li><strong>Why it MATTERS</strong> — Legacy, sustainability, and the ripple effect of your journey (Home Plate).</li>
                 <li><strong>Your full journey report</strong> — A personalized summary and breakthroughs you can keep.</li>
               </ul>
+              <div className="pt-6 border-t border-loam-brown/20">
+                <div className="flex items-center justify-center gap-3 mb-4">
+                  <span className="text-xl text-gray-400 line-through">$299</span>
+                  <span className="text-3xl font-bold text-loam-brown">$59</span>
+                </div>
+                <p className="text-center text-sm text-gray-500 mb-2">{CONVERSION_COPY.SCARCITY_LINE}</p>
+                <p className="text-center text-sm text-gray-600 mb-4">{CONVERSION_COPY.TRUST_LINE}</p>
+                <Link to="/purchase" className="block w-full text-center bg-loam-brown text-white py-4 px-6 rounded-loam text-lg font-semibold hover:bg-loam-brown/90 focus:outline-none focus:ring-2 focus:ring-loam-brown focus:ring-offset-2 transition">
+                  Start my full journey — $59
+                </Link>
+              </div>
             </div>
             <div className="space-y-4">
               <button type="button" onClick={() => setStep('snapshot')} disabled={generatingSnapshot} className="w-full bg-loam-brown text-white py-4 px-6 rounded-loam text-lg font-semibold hover:bg-loam-brown/90 focus:outline-none focus:ring-2 focus:ring-loam-brown focus:ring-offset-2 transition disabled:opacity-50 disabled:cursor-not-allowed">
                 Get my snapshot by email
               </button>
-              <Link to="/purchase" className="block w-full text-center border-2 border-loam-brown text-loam-brown py-4 px-6 rounded-loam text-lg font-semibold hover:bg-loam-brown/5 focus:outline-none focus:ring-2 focus:ring-loam-brown focus:ring-offset-2 transition">
-                Start my full journey — $59
-              </Link>
-              <p className="text-center text-sm text-gray-500">{CONVERSION_COPY.SCARCITY_LINE}</p>
-              <p className="text-center text-sm text-gray-600">{CONVERSION_COPY.TRUST_LINE}</p>
               <button type="button" onClick={() => navigate('/path-selection', { state: { happinessScore, clarityScore, readinessScore, biggestChallenge, whyMatters, whatWouldChange, recommendedPath } })} className="w-full py-2 text-gray-500 hover:text-gray-700 text-sm font-medium">
                 Skip for now and see my recommended path
               </button>

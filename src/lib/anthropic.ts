@@ -30,6 +30,11 @@ export interface CoachingContext {
     root_legacy?: string;
     root_sustainability_threat?: string;
   };
+  preAssessment?: {
+    biggest_challenge: string;
+    why_matters?: string;
+    what_would_change?: string;
+  };
   userName?: string;
 }
 
@@ -59,7 +64,7 @@ export async function generateCoachResponse(
     throw new Error('Anthropic API key not configured');
   }
 
-  const { baseStage, whyLevel, previousMessages, rootInsights, userName } = context;
+  const { baseStage, whyLevel, previousMessages, rootInsights, preAssessment, userName } = context;
   const baseInfo = BASE_STAGES.find(b => b.key === baseStage);
   const baseInstruction = BASE_INSTRUCTIONS[baseStage] || '';
 
@@ -100,6 +105,8 @@ Only complete this stage after BOTH sequences are done.
 ` : ''}
 
 ${rootInsights && Object.keys(rootInsights).length > 0 ? `\nPrevious insights they've discovered:\n${JSON.stringify(rootInsights, null, 2)}` : ''}
+
+${preAssessment ? `\nThe user's pre-assessment: biggest challenge: ${preAssessment.biggest_challenge}${preAssessment.why_matters ? `; why it matters to them: ${preAssessment.why_matters}` : ''}${preAssessment.what_would_change ? `; what would change if they overcame it: ${preAssessment.what_would_change}` : ''}. Use this to ground the WHY conversation when relevant; don't merely repeat it.` : ''}
 
 ${userName ? `\nThe user's name is ${userName}. Use it occasionally to create connection.` : ''}
 

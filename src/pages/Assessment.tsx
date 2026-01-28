@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useDictation } from '@/hooks/useDictation';
 import { generatePreAssessmentSnapshot } from '@/lib/anthropic';
 import { preAssessments } from '@/lib/supabase';
-import { CONVERSION_COPY } from '@/utils/constants';
+import { CONVERSION_COPY, HOMERUN_PRE_ASSESSMENT_KEY } from '@/utils/constants';
 import { getRedirectPath } from '@/utils/routing';
 
 type Step = 1 | 2 | 'summary' | 'snapshot' | 'snapshot-sent';
@@ -111,6 +111,23 @@ export default function Assessment() {
     setLoading(true);
     setAiSnapshotText(null);
     setSnapshotError(null);
+    
+    // Store assessment in sessionStorage (for B2: create on signup/login)
+    const assessmentPayload = {
+      happinessScore,
+      clarityScore,
+      readinessScore,
+      biggestChallenge,
+      whyMatters,
+      whatWouldChange,
+      recommendedPath,
+    };
+    try {
+      sessionStorage.setItem(HOMERUN_PRE_ASSESSMENT_KEY, JSON.stringify(assessmentPayload));
+    } catch (storageErr) {
+      console.warn('Failed to save assessment to sessionStorage:', storageErr);
+    }
+    
     try {
       if (user?.id) {
         await preAssessments.createPreAssessment({
@@ -122,6 +139,12 @@ export default function Assessment() {
           biggest_challenge: biggestChallenge,
           recommended_path: recommendedPath,
         });
+        // Clear sessionStorage since we've saved to DB
+        try {
+          sessionStorage.removeItem(HOMERUN_PRE_ASSESSMENT_KEY);
+        } catch (storageErr) {
+          // ignore
+        }
       }
       setStep('summary');
     } catch (err) {

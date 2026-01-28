@@ -1,6 +1,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Conversation, Message, BaseProgress, BaseStage, JourneyType } from '@/types/conversation';
 import { PreAssessment } from '@/types/user';
+import { HOMERUN_PRE_ASSESSMENT_KEY } from '@/utils/constants';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -215,5 +216,47 @@ export const preAssessments = {
       .limit(1)
       .maybeSingle();
     return { data, error };
+  },
+
+  /**
+   * Create pre-assessment from sessionStorage (B2: for anonymous users who sign up later)
+   * Returns the parsed payload for navigation state, or null if no stored assessment
+   */
+  async createPreAssessmentFromStorage(userId: string, email: string): Promise<{ success: boolean; payload?: any }> {
+    try {
+      const stored = sessionStorage.getItem(HOMERUN_PRE_ASSESSMENT_KEY);
+      if (!stored) {
+        return { success: false };
+      }
+
+      const payload = JSON.parse(stored);
+      if (!payload || typeof payload !== 'object') {
+        return { success: false };
+      }
+
+      // Map to DB shape
+      const assessment = {
+        user_id: userId,
+        email,
+        happiness_score: payload.happinessScore,
+        clarity_score: payload.clarityScore,
+        readiness_score: payload.readinessScore,
+        biggest_challenge: payload.biggestChallenge || '',
+        recommended_path: payload.recommendedPath || 'personal',
+      };
+
+      const { error } = await this.createPreAssessment(assessment);
+      if (error) {
+        console.error('Failed to create pre-assessment from storage:', error);
+        return { success: false };
+      }
+
+      // Clear storage on success
+      sessionStorage.removeItem(HOMERUN_PRE_ASSESSMENT_KEY);
+      return { success: true, payload };
+    } catch (err) {
+      console.error('Error creating pre-assessment from storage:', err);
+      return { success: false };
+    }
   },
 };

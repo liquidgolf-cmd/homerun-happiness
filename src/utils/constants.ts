@@ -111,3 +111,6 @@ export const CONVERSION_COPY = {
   TRUST_LINE: 'No subscription — one-time purchase. Full access to all 5 bases and your journey report.',
   WHAT_YOU_GET_LINE: '5 bases of AI coaching + your full journey report.',
 } as const;
+
+/** SessionStorage key for pre-assessment data */
+export const HOMERUN_PRE_ASSESSMENT_KEY = 'homerun_pre_assessment';

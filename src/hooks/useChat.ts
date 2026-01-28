@@ -7,6 +7,11 @@ import { detectVagueAnswer } from '@/lib/vague-detector';
 interface UseChatProps {
   conversation: Conversation | null;
   baseStage: BaseStage;
+  preAssessment?: {
+    biggest_challenge: string;
+    why_matters?: string;
+    what_would_change?: string;
+  };
 }
 
 // Detect if AI response suggests conversation completion (suggestion, not requirement)
@@ -56,7 +61,7 @@ function detectCompletion(response: string, baseStage: BaseStage): boolean {
   return (hasSuggestionPhrase && hasNextBasePhrase) || (acknowledgesDiscovery && hasNextBasePhrase);
 }
 
-export function useChat({ conversation, baseStage }: UseChatProps) {
+export function useChat({ conversation, baseStage, preAssessment }: UseChatProps) {
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -153,6 +158,7 @@ export function useChat({ conversation, baseStage }: UseChatProps) {
           root_legacy: conversation.root_legacy,
           root_sustainability_threat: conversation.root_sustainability_threat,
         },
+        preAssessment,
       };
 
       const { response, tokens } = await generateCoachResponse(content, context);

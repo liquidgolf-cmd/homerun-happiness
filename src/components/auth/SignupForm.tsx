@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { preAssessments } from '@/lib/supabase';
 import { getRedirectPath } from '@/utils/routing';
 
 export default function SignupForm() {
@@ -29,9 +30,22 @@ export default function SignupForm() {
     if (error) {
       setLocalError(error.message || 'Failed to sign up');
     } else {
-      // Signup successful - determine redirect path based on user progress
+      // Signup successful - check for stored assessment (B2)
       if (data?.user?.id) {
         try {
+          // Try to create pre-assessment from sessionStorage
+          const { success, payload } = await preAssessments.createPreAssessmentFromStorage(
+            data.user.id,
+            data.user.email || email
+          );
+          
+          if (success && payload) {
+            // Assessment was created from storage, redirect to path-selection with state
+            navigate('/path-selection', { state: payload });
+            return;
+          }
+          
+          // No stored assessment, use normal redirect logic
           const redirectPath = await getRedirectPath(data.user.id);
           navigate(redirectPath);
         } catch (err) {

@@ -8,7 +8,7 @@ import ChatInterface from '@/components/chat/ChatInterface';
 import ProgressBar from '@/components/progress/ProgressBar';
 import WhyCounter from '@/components/progress/WhyCounter';
 import SummaryCard from '@/components/progress/SummaryCard';
-import { baseProgress, messages as messagesApi } from '@/lib/supabase';
+import { baseProgress, messages as messagesApi, preAssessments } from '@/lib/supabase';
 import { downloadConversationPDF } from '@/utils/pdfExport';
 import { generateBreakthroughSummary } from '@/lib/anthropic';
 import { ArrowDownTrayIcon, EyeIcon } from '@heroicons/react/24/outline';
@@ -20,6 +20,7 @@ export default function AtBat() {
   const { messages, loading: chatLoading, loaded: chatLoaded, whyLevel, isComplete, sendMessage, reload } = useChat({
     conversation,
     baseStage: 'at_bat',
+    preAssessment: preAssessment || undefined,
   });
   const { completedStages, isStageCompleted } = useBaseProgress(conversation?.id);
   const navigate = useNavigate();
@@ -30,6 +31,26 @@ export default function AtBat() {
   const [generatingSummary, setGeneratingSummary] = useState(false);
   const [isReviewMode, setIsReviewMode] = useState(false);
   const [allowContinue, setAllowContinue] = useState(false);
+  const [preAssessment, setPreAssessment] = useState<{ biggest_challenge: string; why_matters?: string; what_would_change?: string } | null>(null);
+
+  // Fetch pre-assessment for priming (P2)
+  useEffect(() => {
+    if (user?.id && conversation) {
+      preAssessments.getPreAssessment(user.id)
+        .then(({ data, error }) => {
+          if (!error && data && data.biggest_challenge) {
+            setPreAssessment({
+              biggest_challenge: data.biggest_challenge,
+              why_matters: (data as any).why_matters,
+              what_would_change: (data as any).what_would_change,
+            });
+          }
+        })
+        .catch((err) => {
+          console.warn('Failed to fetch pre-assessment for priming:', err);
+        });
+    }
+  }, [user?.id, conversation?.id]);
 
   // Check if this stage is completed and should be in review mode
   useEffect(() => {
@@ -48,9 +69,18 @@ export default function AtBat() {
       setInitialMessageSent(true);
       
       const sendInitialMessage = async () => {
-        const initialMsg = `Let's get started. We're here to discover your deepest WHY - the real reason behind what you do. Not surface-level answers, but the truth.
+        let initialMsg: string;
+        
+        // Prime initial message with pre-assessment if available (P2)
+        if (preAssessment?.biggest_challenge) {
+          const challengePart = `You shared that your biggest challenge is ${preAssessment.biggest_challenge}`;
+          const whyPart = preAssessment.why_matters ? `, and it matters to you because ${preAssessment.why_matters}` : '';
+          initialMsg = `${challengePart}${whyPart}. Let's go deeper on why that drives you. What do you ACTUALLY want? Be specific - don't give me generic answers like "I want to be happy." What do you really want?`;
+        } else {
+          initialMsg = `Let's get started. We're here to discover your deepest WHY - the real reason behind what you do. Not surface-level answers, but the truth.
 
 Here's my first question: What do you want? Be specific - don't give me generic answers like "I want to be happy." What do you ACTUALLY want?`;
+        }
 
         await messagesApi.addMessage({
           conversation_id: conversation.id,
@@ -65,7 +95,7 @@ Here's my first question: What do you want? Be specific - don't give me generic 
       
       sendInitialMessage();
     }
-  }, [conversation, chatLoaded, messages.length, initialMessageSent, reload]);
+  }, [conversation, chatLoaded, messages.length, initialMessageSent, reload, preAssessment]);
 
   useEffect(() => {
     if ((isComplete || whyLevel >= 5) && conversation && !showCompletion) {

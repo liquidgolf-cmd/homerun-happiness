@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useDictation } from '@/hooks/useDictation';
 import { generatePreAssessmentSnapshot } from '@/lib/anthropic';
 import { preAssessments } from '@/lib/supabase';
+import { CONVERSION_COPY } from '@/utils/constants';
 import { getRedirectPath } from '@/utils/routing';
 
 type Step = 1 | 2 | 'summary' | 'snapshot' | 'snapshot-sent';
@@ -307,9 +308,9 @@ export default function Assessment() {
         {/* Summary */}
         {step === 'summary' && (
           <div className="bg-white rounded-2xl shadow-xl p-8">
-            <div className="text-center mb-6">
+            <div className="text-center mb-6 pb-4 border-b border-gray-200">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Your HomeRun Snapshot</h1>
-              <p className="text-gray-600">Here&apos;s a snapshot based on what you shared</p>
+              <p className="text-gray-600">Your first step toward clarity—here&apos;s what we see.</p>
             </div>
             <div className="mb-6 p-6 bg-loam-neutral rounded-loam border border-loam-clay/20 text-gray-700 leading-relaxed whitespace-pre-wrap">
               {generatingSnapshot ? (
@@ -326,12 +327,12 @@ export default function Assessment() {
                 aiSnapshotText ?? buildSummaryText()
               )}
             </div>
-            <div className="mb-8 p-6 bg-loam-neutral rounded-loam border border-loam-clay/20 text-left">
-              <h2 className="text-lg font-semibold text-gray-900 mb-3">What you get when you continue</h2>
-              <p className="text-gray-700 mb-3">The full HomeRun program builds on this snapshot with AI coaching through every step of the framework:</p>
+            <div className="mb-8 p-6 bg-loam-neutral rounded-loam border-2 border-loam-brown/30 text-left">
+              <h2 className="text-lg font-semibold text-gray-900 mb-3">Your snapshot is just the start. Here&apos;s what the full program adds.</h2>
+              <p className="text-gray-700 mb-3">The full HomeRun program builds on this with AI coaching through every base.</p>
               <ul className="list-disc list-inside text-gray-700 space-y-2 mb-0">
-                <li><strong>Deeper WHY discovery</strong> — Unpack your core motivation with guided “why” conversations (At Bat).</li>
-                <li><strong>WHO you really are</strong> — Move beyond roles to your authentic identity (First Base).</li>
+                <li><strong>Deeper WHY discovery</strong> — Unpack what really drives you (At Bat).</li>
+                <li><strong>WHO you really are</strong> — Get beyond roles to your core identity (First Base).</li>
                 <li><strong>WHAT you want & what&apos;s in the way</strong> — Clarify desires and name fears or obstacles (Second Base).</li>
                 <li><strong>HOW you&apos;ll move forward</strong> — A concrete action plan and ways to stay on track (Third Base).</li>
                 <li><strong>Why it MATTERS</strong> — Legacy, sustainability, and the ripple effect of your journey (Home Plate).</li>
@@ -340,9 +341,14 @@ export default function Assessment() {
             </div>
             <div className="space-y-4">
               <button type="button" onClick={() => setStep('snapshot')} disabled={generatingSnapshot} className="w-full bg-loam-brown text-white py-4 px-6 rounded-loam text-lg font-semibold hover:bg-loam-brown/90 focus:outline-none focus:ring-2 focus:ring-loam-brown focus:ring-offset-2 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                Get your HomeRun Snapshot by email
+                Get my snapshot by email
               </button>
-              <button type="button" onClick={() => navigate('/path-selection', { state: { happinessScore, clarityScore, readinessScore, biggestChallenge, whyMatters, whatWouldChange, recommendedPath } })} className="w-full py-3 text-gray-600 hover:text-gray-900 font-medium">
+              <Link to="/purchase" className="block w-full text-center border-2 border-loam-brown text-loam-brown py-4 px-6 rounded-loam text-lg font-semibold hover:bg-loam-brown/5 focus:outline-none focus:ring-2 focus:ring-loam-brown focus:ring-offset-2 transition">
+                Start my full journey — $59
+              </Link>
+              <p className="text-center text-sm text-gray-500">{CONVERSION_COPY.SCARCITY_LINE}</p>
+              <p className="text-center text-sm text-gray-600">{CONVERSION_COPY.TRUST_LINE}</p>
+              <button type="button" onClick={() => navigate('/path-selection', { state: { happinessScore, clarityScore, readinessScore, biggestChallenge, whyMatters, whatWouldChange, recommendedPath } })} className="w-full py-2 text-gray-500 hover:text-gray-700 text-sm font-medium">
                 Skip for now and see my recommended path
               </button>
             </div>
@@ -384,10 +390,12 @@ export default function Assessment() {
               <h1 className="text-2xl font-bold text-gray-900 mb-2">Check your inbox</h1>
               <p className="text-gray-600">Your HomeRun Snapshot has been sent to <strong>{snapshotEmail}</strong>.</p>
             </div>
-            <div className="p-6 bg-loam-neutral rounded-loam border border-loam-clay/20 mb-8 text-left">
-              <h2 className="text-lg font-semibold text-gray-900 mb-3">Ready to start your full journey?</h2>
-              <p className="text-gray-700 mb-4">The full HomeRun program guides you through the framework with AI coaching. Normally $299. Get 80% off for <strong className="text-loam-brown">$59</strong> for a limited time when you purchase now.</p>
-              <Link to="/purchase" className="inline-block w-full text-center bg-loam-brown text-white py-4 px-6 rounded-loam text-lg font-semibold hover:bg-loam-brown/90 focus:outline-none focus:ring-2 focus:ring-loam-brown focus:ring-offset-2 transition">
+            <div className="p-6 bg-loam-neutral rounded-loam border-2 border-loam-brown/30 mb-6 text-left">
+              <h2 className="text-lg font-semibold text-gray-900 mb-2">Ready to run the full path?</h2>
+              <p className="text-gray-700 mb-3">{CONVERSION_COPY.WHAT_YOU_GET_LINE}</p>
+              <p className="text-sm text-gray-600 mb-4">{CONVERSION_COPY.SCARCITY_LINE}</p>
+              <p className="text-sm text-gray-600 mb-4">{CONVERSION_COPY.TRUST_LINE}</p>
+              <Link to="/purchase" className="block w-full text-center bg-loam-brown text-white py-4 px-6 rounded-loam text-lg font-semibold hover:bg-loam-brown/90 focus:outline-none focus:ring-2 focus:ring-loam-brown focus:ring-offset-2 transition">
                 Start my full journey — $59
               </Link>
             </div>

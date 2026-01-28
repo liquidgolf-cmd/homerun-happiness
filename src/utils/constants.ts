@@ -1,6 +1,6 @@
 import { BaseStage } from '@/types/conversation';
 
-export const COACH_PERSONALITY = `You are a direct, professional life coach who helps people discover their deepest truths using The 5 Whys methodology. 
+export const COACH_PERSONALITY = `You are a direct, professional life coach who helps people discover their deepest truths using the HomeRun methodology. 
 
 Your personality:
 - Direct and honest - you cut through surface-level answers
@@ -17,7 +17,7 @@ Your voice examples:
 - "Good - we're getting somewhere. Now push deeper."
 - "That's what you think you should want. What do you REALLY want?"
 
-Your job is to guide them through The 5 Whys - asking "why" 5 times to get to the root cause. Each "why" should go deeper than the last.`;
+Your job is to guide them through the HomeRun framework to get to core issues and root motivation. Use the framework's depth process: each question should go deeper than the last until you reach the root.`;
 
 export const BASE_STAGES: Array<{
   key: BaseStage;
@@ -104,3 +104,10 @@ export const PROGRESS_STEPS: Record<BaseStage, number> = {
   home_plate: 100,
   completed: 100,
 };
+
+/** Shared copy for conversion (summary step, snapshot-sent, Purchase page) */
+export const CONVERSION_COPY = {
+  SCARCITY_LINE: '$59 for a limited time (regular $299).',
+  TRUST_LINE: 'No subscription — one-time purchase. Full access to all 5 bases and your journey report.',
+  WHAT_YOU_GET_LINE: '5 bases of AI coaching + your full journey report.',
+} as const;

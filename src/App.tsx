@@ -44,7 +44,14 @@ function App() {
         <Route path="/login" element={<LoginForm />} />
         <Route path="/signup" element={<SignupForm />} />
         <Route path="/assessment" element={<Assessment />} />
-        <Route path="/purchase" element={<Purchase />} />
+        <Route
+          path="/purchase"
+          element={
+            <ProtectedRoute>
+              <Purchase />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/path-selection" element={<PathSelection />} />
         <Route
           path="/at-bat"

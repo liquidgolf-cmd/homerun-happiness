@@ -1,14 +1,18 @@
 import { useState, FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useConversation } from '@/hooks/useConversation';
+import { preAssessments } from '@/lib/supabase';
+import { JourneyType } from '@/types/conversation';
 
 const NORMAL_PRICE = 299;
 const OFFER_PRICE = 59;
 
 export default function Purchase() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  const { startNewConversation, conversation } = useConversation(user?.id);
   const [loading, setLoading] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Billing information
@@ -75,6 +79,12 @@ export default function Purchase() {
       return;
     }
 
+    // Check if user is authenticated
+    if (!user) {
+      navigate('/login', { state: { from: '/purchase' } });
+      return;
+    }
+
     setLoading(true);
 
     // TODO: Replace with Stripe payment processing
@@ -83,8 +93,8 @@ export default function Purchase() {
     // 3. Confirm payment with Stripe Elements: await stripe.confirmCardPayment(clientSecret, { payment_method: { card: cardElement } });
     // 4. Handle success/error and redirect to success page or show error
 
-    // For now: simulate processing delay and show "coming soon" message
-    setTimeout(() => {
+    // For now: simulate processing delay
+    setTimeout(async () => {
       const formData = {
         billing: {
           name: billingName,
@@ -104,28 +114,54 @@ export default function Purchase() {
       };
       
       console.log('Form data (ready for Stripe):', formData);
-      setLoading(false);
-      setShowSuccess(true);
+
+      try {
+        // Fetch pre-assessment to get journey type
+        const { data: preAssessment } = await preAssessments.getPreAssessment(user.id);
+        
+        // Determine journey type from pre-assessment or default to 'personal'
+        const journeyType: JourneyType = (preAssessment?.recommended_path as JourneyType) || 'personal';
+
+        // Ensure conversation exists (create if needed)
+        if (!conversation) {
+          const { error: convError } = await startNewConversation(journeyType);
+          if (convError) {
+            console.error('Failed to create conversation:', convError);
+            // Still redirect - AtBat will handle missing conversation gracefully
+          }
+        }
+
+        // Redirect to AtBat to begin coaching journey
+        navigate('/at-bat');
+      } catch (error) {
+        console.error('Error setting up conversation:', error);
+        // Still redirect - AtBat will handle errors gracefully
+        navigate('/at-bat');
+      } finally {
+        setLoading(false);
+      }
     }, 1500);
   };
 
-  if (showSuccess) {
+  // Show loading state while processing
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-loam-neutral to-loam-neutral px-4 py-12">
-        <div className="max-w-lg mx-auto">
-          <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
-            <div className="w-16 h-16 bg-loam-green rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4">✓</div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Thank you!</h1>
-            <p className="text-gray-600 mb-4">
-              Payment processing will be enabled soon. We&apos;ve saved your information and will notify you when checkout is ready.
-            </p>
-            <p className="text-sm text-gray-500 mb-6">
-              Your form data has been logged to the console for testing.
-            </p>
-            <Link to="/" className="inline-block bg-loam-brown text-white py-3 px-6 rounded-loam font-medium hover:bg-loam-brown/90 focus:outline-none focus:ring-2 focus:ring-loam-brown focus:ring-offset-2 transition">
-              Back to home
-            </Link>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-loam-neutral to-loam-neutral px-4 py-12 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-loam-brown mb-4"></div>
+          <p className="text-gray-600">Processing your purchase...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Check authentication (show loading while checking)
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-loam-neutral to-loam-neutral px-4 py-12 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-loam-brown mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     );

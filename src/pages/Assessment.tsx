@@ -1,68 +1,69 @@
 import { useState, useEffect, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { preAssessments } from '@/lib/supabase';
 import { getRedirectPath } from '@/utils/routing';
 
+type Step = 1 | 2 | 'summary' | 'snapshot' | 'snapshot-sent';
+
 export default function Assessment() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [step, setStep] = useState<Step>(1);
   const [happinessScore, setHappinessScore] = useState(5);
   const [clarityScore, setClarityScore] = useState(5);
   const [readinessScore, setReadinessScore] = useState(5);
   const [biggestChallenge, setBiggestChallenge] = useState('');
+  const [whyMatters, setWhyMatters] = useState('');
+  const [whatWouldChange, setWhatWouldChange] = useState('');
+  const [snapshotName, setSnapshotName] = useState('');
+  const [snapshotEmail, setSnapshotEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [checkingProgress, setCheckingProgress] = useState(true);
 
-  // Auto-redirect if user has already completed assessment
+  const recommendedPath = happinessScore + clarityScore + readinessScore < 15 ? 'business' : 'personal';
+
   useEffect(() => {
     const checkProgress = async () => {
       if (authLoading || !user?.id) {
         setCheckingProgress(false);
         return;
       }
-
       try {
         const redirectPath = await getRedirectPath(user.id);
-        // If redirect path is not assessment, user has already completed it
         if (redirectPath !== '/assessment') {
           navigate(redirectPath, { replace: true });
           return;
         }
       } catch (err) {
         console.error('Error checking progress:', err);
-        // Continue to show assessment form if check fails
       } finally {
         setCheckingProgress(false);
       }
     };
-
     checkProgress();
   }, [user?.id, authLoading, navigate]);
 
-  const calculateRecommendedPath = () => {
-    const totalScore = happinessScore + clarityScore + readinessScore;
-    // Lower scores indicate more need for business path
-    // Higher scores indicate personal path readiness
-    return totalScore < 15 ? 'business' : 'personal';
-  };
-
-  const handleSubmit = async (e: FormEvent) => {
+  const handlePage1Submit = (e: FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
-
     if (!biggestChallenge.trim()) {
       setError('Please describe your biggest challenge');
-      setLoading(false);
       return;
     }
+    setStep(2);
+  };
 
+  const handlePage2Submit = async (e: FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    if (!whyMatters.trim()) {
+      setError('Please share why addressing this challenge matters to you');
+      return;
+    }
+    setLoading(true);
     try {
-      const recommendedPath = calculateRecommendedPath();
-
-      // Save to DB only when logged in (anonymous pre-assessment skips save)
       if (user?.id) {
         await preAssessments.createPreAssessment({
           user_id: user.id,
@@ -74,25 +75,46 @@ export default function Assessment() {
           recommended_path: recommendedPath,
         });
       }
-
-      navigate('/path-selection', {
-        state: {
-          happinessScore,
-          clarityScore,
-          readinessScore,
-          biggestChallenge,
-          recommendedPath,
-        },
-      });
+      setStep('summary');
     } catch (err) {
-      setError('An unexpected error occurred');
-      console.error(err);
+      setError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Show loading state while checking progress
+  const handleSnapshotSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    if (!snapshotName.trim() || !snapshotEmail.trim()) {
+      setError('Please enter your name and email');
+      return;
+    }
+    setLoading(true);
+    try {
+      // TODO: send HomeRun Snapshot email via your backend (e.g. Resend, SendGrid, Supabase Edge Function)
+      // await sendSnapshotEmail({ name: snapshotName, email: snapshotEmail, summary: buildSummaryText() });
+      setStep('snapshot-sent');
+    } catch (err) {
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const buildSummaryText = () => {
+    const pathLabel = recommendedPath === 'business' ? 'Business Journey' : 'Personal Life Journey';
+    return [
+      `You're at ${happinessScore}/10 for happiness, ${clarityScore}/10 for clarity, and ${readinessScore}/10 for readiness.`,
+      `Your biggest challenge right now is: ${biggestChallenge}`,
+      whyMatters && `It matters to you because: ${whyMatters}`,
+      whatWouldChange && `If you could overcome it, you imagine: ${whatWouldChange}`,
+      `Based on your answers, we recommend the ${pathLabel}.`,
+    ]
+      .filter(Boolean)
+      .join(' ');
+  };
+
   if (checkingProgress || authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -107,112 +129,148 @@ export default function Assessment() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-loam-neutral to-loam-neutral px-4 py-12">
       <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Pre-Assessment</h1>
-            <p className="text-gray-600">
-              Help us understand where you're at so we can guide your journey
-            </p>
+        {/* Stepper */}
+        {(step === 1 || step === 2) && (
+          <div className="mb-6 text-center text-sm text-gray-500">
+            Step {step} of 2
           </div>
+        )}
 
-          <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Happiness Score */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <label className="text-lg font-semibold text-gray-900">
-                  On a scale of 1-10, how happy are you right now?
-                </label>
-                <span className="text-2xl font-bold text-loam-brown">{happinessScore}</span>
-              </div>
-              <input
-                type="range"
-                min="1"
-                max="10"
-                value={happinessScore}
-                onChange={(e) => setHappinessScore(parseInt(e.target.value))}
-                className="w-full h-3 bg-gray-200 rounded-loam appearance-none cursor-pointer accent-loam-brown"
-              />
-              <div className="flex justify-between text-xs text-gray-500 mt-1">
-                <span>Not happy</span>
-                <span>Very happy</span>
-              </div>
+        {/* Step 1: Sliders + biggest challenge */}
+        {step === 1 && (
+          <div className="bg-white rounded-2xl shadow-xl p-8">
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Pre-Assessment</h1>
+              <p className="text-gray-600">Help us understand where you&apos;re at so we can guide your journey</p>
             </div>
+            <form onSubmit={handlePage1Submit} className="space-y-8">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <label className="text-lg font-semibold text-gray-900">On a scale of 1–10, how happy are you right now?</label>
+                  <span className="text-2xl font-bold text-loam-brown">{happinessScore}</span>
+                </div>
+                <input type="range" min="1" max="10" value={happinessScore} onChange={(e) => setHappinessScore(parseInt(e.target.value))} className="w-full h-3 bg-gray-200 rounded-loam appearance-none cursor-pointer accent-loam-brown" />
+                <div className="flex justify-between text-xs text-gray-500 mt-1"><span>Not happy</span><span>Very happy</span></div>
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <label className="text-lg font-semibold text-gray-900">How clear are you on your goals?</label>
+                  <span className="text-2xl font-bold text-loam-brown">{clarityScore}</span>
+                </div>
+                <input type="range" min="1" max="10" value={clarityScore} onChange={(e) => setClarityScore(parseInt(e.target.value))} className="w-full h-3 bg-gray-200 rounded-loam appearance-none cursor-pointer accent-loam-brown" />
+                <div className="flex justify-between text-xs text-gray-500 mt-1"><span>Unclear</span><span>Very clear</span></div>
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <label className="text-lg font-semibold text-gray-900">How ready are you to make changes?</label>
+                  <span className="text-2xl font-bold text-loam-brown">{readinessScore}</span>
+                </div>
+                <input type="range" min="1" max="10" value={readinessScore} onChange={(e) => setReadinessScore(parseInt(e.target.value))} className="w-full h-3 bg-gray-200 rounded-loam appearance-none cursor-pointer accent-loam-brown" />
+                <div className="flex justify-between text-xs text-gray-500 mt-1"><span>Not ready</span><span>Very ready</span></div>
+              </div>
+              <div>
+                <label htmlFor="challenge" className="block text-lg font-semibold text-gray-900 mb-3">What&apos;s your biggest challenge right now?</label>
+                <textarea id="challenge" value={biggestChallenge} onChange={(e) => setBiggestChallenge(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-loam focus:ring-2 focus:ring-loam-brown focus:border-transparent resize-none" rows={4} placeholder="Tell us what's holding you back or what you're struggling with most..." required />
+              </div>
+              {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-loam text-sm">{error}</div>}
+              <button type="submit" className="w-full bg-loam-brown text-white py-4 px-6 rounded-loam text-lg font-semibold hover:bg-loam-brown/90 focus:outline-none focus:ring-2 focus:ring-loam-brown focus:ring-offset-2 transition">Continue</button>
+            </form>
+          </div>
+        )}
 
-            {/* Clarity Score */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <label className="text-lg font-semibold text-gray-900">
-                  How clear are you on your goals?
-                </label>
-                <span className="text-2xl font-bold text-loam-brown">{clarityScore}</span>
-              </div>
-              <input
-                type="range"
-                min="1"
-                max="10"
-                value={clarityScore}
-                onChange={(e) => setClarityScore(parseInt(e.target.value))}
-                className="w-full h-3 bg-gray-200 rounded-loam appearance-none cursor-pointer accent-loam-brown"
-              />
-              <div className="flex justify-between text-xs text-gray-500 mt-1">
-                <span>Unclear</span>
-                <span>Very clear</span>
-              </div>
+        {/* Step 2: Why questions */}
+        {step === 2 && (
+          <div className="bg-white rounded-2xl shadow-xl p-8">
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">A little more about why this matters</h1>
+              <p className="text-gray-600">Go a bit deeper so we can tailor your snapshot</p>
             </div>
+            <form onSubmit={handlePage2Submit} className="space-y-6">
+              <div>
+                <label htmlFor="why-matters" className="block text-lg font-semibold text-gray-900 mb-2">Why does addressing this challenge matter to you?</label>
+                <textarea id="why-matters" value={whyMatters} onChange={(e) => setWhyMatters(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-loam focus:ring-2 focus:ring-loam-brown focus:border-transparent resize-none" rows={4} placeholder="What's at stake for you?" required />
+              </div>
+              <div>
+                <label htmlFor="what-would-change" className="block text-lg font-semibold text-gray-900 mb-2">What would be different in your life if you could overcome it?</label>
+                <textarea id="what-would-change" value={whatWouldChange} onChange={(e) => setWhatWouldChange(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-loam focus:ring-2 focus:ring-loam-brown focus:border-transparent resize-none" rows={4} placeholder="Imagine the impact..." />
+              </div>
+              {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-loam text-sm">{error}</div>}
+              <div className="flex gap-3">
+                <button type="button" onClick={() => setStep(1)} disabled={loading} className="flex-1 py-3 px-6 border border-gray-300 text-gray-700 rounded-loam font-semibold hover:bg-gray-50 transition disabled:opacity-50">Back</button>
+                <button type="submit" disabled={loading} className="flex-1 bg-loam-brown text-white py-4 px-6 rounded-loam text-lg font-semibold hover:bg-loam-brown/90 focus:outline-none focus:ring-2 focus:ring-loam-brown focus:ring-offset-2 transition disabled:opacity-50">{loading ? 'Saving...' : 'See my summary'}</button>
+              </div>
+            </form>
+          </div>
+        )}
 
-            {/* Readiness Score */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <label className="text-lg font-semibold text-gray-900">
-                  How ready are you to make changes?
-                </label>
-                <span className="text-2xl font-bold text-loam-brown">{readinessScore}</span>
-              </div>
-              <input
-                type="range"
-                min="1"
-                max="10"
-                value={readinessScore}
-                onChange={(e) => setReadinessScore(parseInt(e.target.value))}
-                className="w-full h-3 bg-gray-200 rounded-loam appearance-none cursor-pointer accent-loam-brown"
-              />
-              <div className="flex justify-between text-xs text-gray-500 mt-1">
-                <span>Not ready</span>
-                <span>Very ready</span>
-              </div>
+        {/* Summary */}
+        {step === 'summary' && (
+          <div className="bg-white rounded-2xl shadow-xl p-8">
+            <div className="text-center mb-6">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Your HomeRun Snapshot</h1>
+              <p className="text-gray-600">Here&apos;s a snapshot based on what you shared</p>
             </div>
-
-            {/* Biggest Challenge */}
-            <div>
-              <label htmlFor="challenge" className="block text-lg font-semibold text-gray-900 mb-3">
-                What's your biggest challenge right now?
-              </label>
-              <textarea
-                id="challenge"
-                value={biggestChallenge}
-                onChange={(e) => setBiggestChallenge(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-loam focus:ring-2 focus:ring-loam-brown focus:border-transparent resize-none"
-                rows={5}
-                placeholder="Tell us what's holding you back or what you're struggling with most..."
-                required
-              />
+            <div className="mb-8 p-6 bg-loam-neutral rounded-loam border border-loam-clay/20 text-gray-700 leading-relaxed whitespace-pre-wrap">
+              {buildSummaryText()}
             </div>
+            <div className="space-y-4">
+              <button type="button" onClick={() => setStep('snapshot')} className="w-full bg-loam-brown text-white py-4 px-6 rounded-loam text-lg font-semibold hover:bg-loam-brown/90 focus:outline-none focus:ring-2 focus:ring-loam-brown focus:ring-offset-2 transition">
+                Get your HomeRun Snapshot by email
+              </button>
+              <button type="button" onClick={() => navigate('/path-selection', { state: { happinessScore, clarityScore, readinessScore, biggestChallenge, whyMatters, whatWouldChange, recommendedPath } })} className="w-full py-3 text-gray-600 hover:text-gray-900 font-medium">
+                Skip for now and see my recommended path
+              </button>
+            </div>
+          </div>
+        )}
 
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-loam text-sm">
-                {error}
+        {/* Snapshot: name + email */}
+        {step === 'snapshot' && (
+          <div className="bg-white rounded-2xl shadow-xl p-8">
+            <div className="text-center mb-6">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Get your HomeRun Snapshot by email</h1>
+              <p className="text-gray-600">We&apos;ll send your snapshot to your inbox</p>
+            </div>
+            <form onSubmit={handleSnapshotSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="snapshot-name" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <input id="snapshot-name" type="text" value={snapshotName} onChange={(e) => setSnapshotName(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-loam focus:ring-2 focus:ring-loam-brown focus:border-transparent" placeholder="Your name" required />
               </div>
-            )}
+              <div>
+                <label htmlFor="snapshot-email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input id="snapshot-email" type="email" value={snapshotEmail} onChange={(e) => setSnapshotEmail(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-loam focus:ring-2 focus:ring-loam-brown focus:border-transparent" placeholder="you@example.com" required />
+              </div>
+              {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-loam text-sm">{error}</div>}
+              <div className="flex gap-3">
+                <button type="button" onClick={() => setStep('summary')} className="flex-1 py-3 px-6 border border-gray-300 text-gray-700 rounded-loam font-semibold hover:bg-gray-50 transition">Back</button>
+                <button type="submit" disabled={loading} className="flex-1 bg-loam-brown text-white py-4 px-6 rounded-loam text-lg font-semibold hover:bg-loam-brown/90 focus:outline-none focus:ring-2 focus:ring-loam-brown focus:ring-offset-2 disabled:opacity-50 transition">
+                  {loading ? 'Sending...' : 'Send my Snapshot'}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-loam-brown text-white py-4 px-6 rounded-loam text-lg font-semibold hover:bg-loam-brown/90 focus:outline-none focus:ring-2 focus:ring-loam-brown focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
-            >
-              {loading ? 'Saving...' : 'Continue to Path Selection'}
+        {/* Snapshot sent + Purchase CTA */}
+        {step === 'snapshot-sent' && (
+          <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
+            <div className="mb-8">
+              <div className="w-16 h-16 bg-loam-green rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4">✓</div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Check your inbox</h1>
+              <p className="text-gray-600">Your HomeRun Snapshot has been sent to <strong>{snapshotEmail}</strong>.</p>
+            </div>
+            <div className="p-6 bg-loam-neutral rounded-loam border border-loam-clay/20 mb-8 text-left">
+              <h2 className="text-lg font-semibold text-gray-900 mb-3">Ready to start your full journey?</h2>
+              <p className="text-gray-700 mb-4">The full HomeRun program guides you through the framework with AI coaching. Normally $299. Get 80% off for <strong className="text-loam-brown">$59</strong> for a limited time when you purchase now.</p>
+              <Link to="/purchase" className="inline-block w-full text-center bg-loam-brown text-white py-4 px-6 rounded-loam text-lg font-semibold hover:bg-loam-brown/90 focus:outline-none focus:ring-2 focus:ring-loam-brown focus:ring-offset-2 transition">
+                Start my full journey — $59
+              </Link>
+            </div>
+            <button type="button" onClick={() => navigate('/path-selection', { state: { happinessScore, clarityScore, readinessScore, biggestChallenge, whyMatters, whatWouldChange, recommendedPath } })} className="text-gray-500 hover:text-gray-700 text-sm">
+              Just show my recommended path for now
             </button>
-          </form>
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

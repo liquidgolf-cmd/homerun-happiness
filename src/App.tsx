@@ -12,6 +12,7 @@ import SecondBase from '@/pages/SecondBase';
 import ThirdBase from '@/pages/ThirdBase';
 import HomePlate from '@/pages/HomePlate';
 import Report from '@/pages/Report';
+import Purchase from '@/pages/Purchase';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -43,6 +44,7 @@ function App() {
         <Route path="/login" element={<LoginForm />} />
         <Route path="/signup" element={<SignupForm />} />
         <Route path="/assessment" element={<Assessment />} />
+        <Route path="/purchase" element={<Purchase />} />
         <Route path="/path-selection" element={<PathSelection />} />
         <Route
           path="/at-bat"

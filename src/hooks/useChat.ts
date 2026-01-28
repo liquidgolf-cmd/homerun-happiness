@@ -160,7 +160,7 @@ export function useChat({ conversation, baseStage }: UseChatProps) {
       // Check if AI indicates completion
       const completionDetected = detectCompletion(response, baseStage);
       
-      // Determine if we should increment why level
+      // Determine if we should increment depth step
       const nextWhyLevel = whyLevel >= 5 ? 5 : whyLevel + 1;
 
       // Save assistant message

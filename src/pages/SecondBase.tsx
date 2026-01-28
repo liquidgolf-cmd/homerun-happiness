@@ -234,7 +234,7 @@ What are you afraid of? What obstacles stand in your way? What fears hold you ba
     );
   }
 
-  // Calculate display why level (reset for second sequence)
+  // Calculate display depth step (reset for second sequence)
   const displayWhyLevel = desireComplete ? whyLevel : whyLevel;
   const sequenceLabel = desireComplete ? 'Fears' : 'Desires';
 

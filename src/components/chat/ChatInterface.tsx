@@ -87,7 +87,7 @@ export default function ChatInterface({ messages, loading, onSendMessage, disabl
         {messages.length === 0 && (
           <div className="text-center text-gray-500 py-12">
             <p className="text-lg mb-2">Start your conversation</p>
-            <p className="text-sm">The coach will guide you through The 5 Whys to discover your deepest truths.</p>
+            <p className="text-sm">The coach will guide you through the HomeRun Method to discover your deepest truths.</p>
           </div>
         )}
         

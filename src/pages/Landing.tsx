@@ -23,7 +23,7 @@ export default function Landing() {
             </span>
           </h1>
           <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-8">
-            Discover your deepest WHY using AI-powered coaching and the HomeRun methodology.
+            Discover your deepest WHY using AI-powered coaching and the HomeRun Method.
             Build a clear path to the life you truly want.
           </p>
         </div>
@@ -56,7 +56,7 @@ export default function Landing() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-loam-green font-bold mt-0.5">✓</span>
-                  <span>The HomeRun framework to get to your core issues and root motivation</span>
+                  <span>The HomeRun Method to get to your core issues and root motivation</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-loam-green font-bold mt-0.5">✓</span>
@@ -71,11 +71,11 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* Framework Explanation */}
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl font-bold text-loam-brown mb-8 sm:mb-12 text-center">
-            The HomeRun Framework
-          </h2>
+          {/* Method Explanation */}
+          <div className="max-w-5xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl font-bold text-loam-brown mb-8 sm:mb-12 text-center">
+              The HomeRun Method
+            </h2>
           <div className="bg-loam-neutral rounded-loam p-4 sm:p-6 md:p-8 mb-12 border border-loam-clay/20">
             {/* Mobile: Vertical Stack | Desktop: Horizontal Flow */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 md:gap-4">
@@ -137,7 +137,7 @@ export default function Landing() {
                   desc: 'Get honest, no-BS feedback from an AI coach who pushes you deeper.',
                 },
                 {
-                  title: 'The HomeRun Framework',
+                  title: 'The HomeRun Method',
                   desc: 'Move through WHY, WHO, WHAT, HOW, and WHY IT MATTERS to reach your core truths.',
                 },
                 {

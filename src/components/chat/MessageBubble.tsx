@@ -26,12 +26,6 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
             : 'bg-loam-neutral text-loam-charcoal'
         }`}
       >
-        {isAssistant && message.why_level && (
-          <div className="text-xs font-medium mb-1 text-gray-600">
-            Why Level {message.why_level}/5
-          </div>
-        )}
-        
         {message.is_vague && (
           <div className="flex items-center gap-1 mb-2 text-amber-600 text-xs font-medium">
             <ExclamationTriangleIcon className="w-4 h-4" />

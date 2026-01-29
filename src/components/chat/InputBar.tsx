@@ -169,17 +169,20 @@ export default function InputBar({ onSend, disabled = false }: InputBarProps) {
                   ? 'Stop dictation'
                   : 'Dictate your answer'
             }
-            className={`flex-shrink-0 self-end flex items-center justify-center w-12 h-12 rounded-loam font-medium transition ${
+            className={`flex-shrink-0 self-end flex items-center justify-center gap-1.5 min-w-[5rem] min-h-[3rem] px-2 py-3 rounded-loam font-medium transition ${
               isListening
                 ? 'bg-red-500 text-white hover:bg-red-600 focus:ring-2 focus:ring-red-400 focus:ring-offset-2'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-loam-brown focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
             }`}
           >
             {isListening ? (
-              <StopIcon className="w-6 h-6" aria-hidden />
+              <StopIcon className="w-6 h-6 shrink-0" aria-hidden />
             ) : (
-              <MicrophoneIcon className="w-6 h-6" aria-hidden />
+              <MicrophoneIcon className="w-6 h-6 shrink-0" aria-hidden />
             )}
+            <span className="text-xs font-semibold whitespace-nowrap">
+              {isListening ? 'Stop' : 'Mic'}
+            </span>
           </button>
         </div>
         <button

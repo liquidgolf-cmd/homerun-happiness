@@ -306,7 +306,7 @@ What are you afraid of? What obstacles stand in your way? What fears hold you ba
                   You've Discovered WHAT You Want and What's Stopping You!
                 </h2>
                 <p className="text-gray-600 mb-6">
-                  You've completed this step of the HomeRun framework and discovered your deepest desires and fears. Ready to move to Third Base and map out HOW you'll make it happen?
+                  You've completed this step of the HomeRun Method and discovered your deepest desires and fears. Ready to move to Third Base and map out HOW you'll make it happen?
                 </p>
                 <div className="flex gap-4 justify-center flex-wrap">
                   <button

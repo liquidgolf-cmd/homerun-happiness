@@ -1,6 +1,6 @@
 # HomeRun to Happiness - MVP
 
-AI-powered conversational coaching application that guides users through a 5-stage framework using The 5 Whys methodology with a direct, empathetic coaching voice.
+AI-powered conversational coaching application that guides users through the HomeRun framework—WHY, WHO, WHAT, HOW, and WHY IT MATTERS—with a direct, empathetic coaching voice.
 
 ## Tech Stack
 
@@ -55,7 +55,7 @@ The app will be available at `http://localhost:5173`
 ## Features
 
 - **Direct AI Coaching**: No-BS coaching personality that challenges vague answers
-- **The 5 Whys Method**: Asks "why" 5 times to reach root motivations
+- **The HomeRun Framework**: Gets to core issues and root motivations through structured depth
 - **Vague Answer Detection**: Automatically detects and challenges surface-level responses
 - **Progress Tracking**: Visual baseball diamond showing journey progress
 - **Conversation Persistence**: All progress saved in Supabase
@@ -84,8 +84,8 @@ homerun-app/
 1. **Landing** → Introduction and framework explanation
 2. **Assessment** → Pre-assessment quiz (4 questions)
 3. **Path Selection** → Choose Business or Personal journey
-4. **At Bat** → Discover WHY (5 Whys sequence)
-5. **First Base** → Discover WHO (5 Whys sequence)
+4. **At Bat** → Discover WHY
+5. **First Base** → Discover WHO
 6. **Report** → View all insights discovered
 
 ## Security Note

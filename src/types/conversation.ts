@@ -27,7 +27,7 @@ export interface Conversation {
   paused_at?: string;
   is_active: boolean;
   
-  // Core insights extracted from 5 Whys
+  // Core insights extracted from HomeRun Method dialogue
   root_why?: string;
   root_identity?: string;
   root_desire?: string;

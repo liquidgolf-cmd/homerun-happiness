@@ -39,7 +39,7 @@ export interface CoachingContext {
 }
 
 const BASE_INSTRUCTIONS: Record<BaseStage, string> = {
-  at_bat: `You're helping the user discover their deepest WHY - their core motivation for everything they do. This is the foundation of their journey. Use the HomeRun framework to dig into their motivation, values, and what truly drives them.`,
+  at_bat: `You're helping the user discover their deepest WHY - their core motivation for everything they do. This is the foundation of their journey. Use the HomeRun Method to dig into their motivation, values, and what truly drives them.`,
   first_base: `You're helping the user discover WHO they really are - their authentic identity beyond roles and labels. Who are they at their core? What makes them uniquely them?`,
   second_base: `You're helping the user discover WHAT they truly want and what's stopping them. This involves two deep-question sequences - one for desires, one for fears/obstacles.`,
   third_base: `You're helping the user create a sustainable action plan - HOW they'll actually move forward. What are the concrete steps? What obstacles will they face?`,
@@ -89,7 +89,7 @@ Evaluate if the user has discovered a genuine root insight. If their answer reve
 3. Suggest next step (but don't force it): "Ready to move forward? ${nextBaseGuidance}? Or would you like to explore this deeper?"
 4. Keep it concise, celebratory, and inviting - let them choose to continue or move on
 
-If the insight isn't deep enough yet, use the HomeRun framework to go deeper.
+If the insight isn't deep enough yet, use the HomeRun Method to go deeper.
 ` : ''}
 
 ${baseStage === 'second_base' ? `
@@ -247,7 +247,7 @@ export async function generatePreAssessmentSnapshot(params: PreAssessmentSnapsho
 
   const pathLabel = params.recommendedPath === 'business' ? 'Business Journey' : 'Personal Life Journey';
 
-  const systemPrompt = `You are a thoughtful life coach using the HomeRun framework. Your task is to write a "HomeRun Snapshot" from a pre-assessment. Use the same reflective, WHY-focused style as the "at bat" breakthrough summary: warm, second person ("you"), interpretive—not a repeat of their answers.
+  const systemPrompt = `You are a thoughtful life coach using the HomeRun Method. Your task is to write a "HomeRun Snapshot" from a pre-assessment. Use the same reflective, WHY-focused style as the "at bat" breakthrough summary: warm, second person ("you"), interpretive—not a repeat of their answers.
 
 Do NOT simply restate scores and answers. Instead:
 1. Synthesize what they shared into themes (their challenge, what's at stake, the change they imagine).

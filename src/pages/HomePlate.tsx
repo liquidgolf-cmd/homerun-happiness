@@ -6,7 +6,6 @@ import { useChat } from '@/hooks/useChat';
 import { useBaseProgress } from '@/hooks/useBaseProgress';
 import ChatInterface from '@/components/chat/ChatInterface';
 import ProgressBar from '@/components/progress/ProgressBar';
-import WhyCounter from '@/components/progress/WhyCounter';
 import SummaryCard from '@/components/progress/SummaryCard';
 import { baseProgress, messages as messagesApi } from '@/lib/supabase';
 import { downloadConversationPDF } from '@/utils/pdfExport';
@@ -188,7 +187,6 @@ Here's my question: Why does this journey truly matter? Not just to you - what's
           </div>
         )}
         <ProgressBar currentBase="home_plate" completedStages={completedStages} />
-        <WhyCounter currentLevel={whyLevel} />
         
         {/* Download Button */}
         {messages.length > 0 && (

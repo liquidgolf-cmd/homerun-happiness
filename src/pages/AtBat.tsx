@@ -6,7 +6,6 @@ import { useChat } from '@/hooks/useChat';
 import { useBaseProgress } from '@/hooks/useBaseProgress';
 import ChatInterface from '@/components/chat/ChatInterface';
 import ProgressBar from '@/components/progress/ProgressBar';
-import WhyCounter from '@/components/progress/WhyCounter';
 import SummaryCard from '@/components/progress/SummaryCard';
 import { baseProgress, messages as messagesApi, preAssessments } from '@/lib/supabase';
 import { downloadConversationPDF } from '@/utils/pdfExport';
@@ -216,7 +215,6 @@ Here's my first question: What do you want? Be specific - don't give me generic 
           </div>
         )}
         <ProgressBar currentBase="at_bat" completedStages={completedStages} />
-        <WhyCounter currentLevel={whyLevel} />
         
         {/* Download Button */}
         {messages.length > 0 && (

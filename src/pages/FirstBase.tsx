@@ -6,7 +6,6 @@ import { useChat } from '@/hooks/useChat';
 import { useBaseProgress } from '@/hooks/useBaseProgress';
 import ChatInterface from '@/components/chat/ChatInterface';
 import ProgressBar from '@/components/progress/ProgressBar';
-import WhyCounter from '@/components/progress/WhyCounter';
 import SummaryCard from '@/components/progress/SummaryCard';
 import { baseProgress, messages as messagesApi } from '@/lib/supabase';
 import { downloadConversationPDF } from '@/utils/pdfExport';
@@ -186,7 +185,6 @@ Here's my question: When you strip away your job title, your roles, and what oth
           </div>
         )}
         <ProgressBar currentBase="first_base" completedStages={completedStages} />
-        <WhyCounter currentLevel={whyLevel} />
         
         {/* Download Button */}
         {messages.length > 0 && (

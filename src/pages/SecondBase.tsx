@@ -6,7 +6,6 @@ import { useChat } from '@/hooks/useChat';
 import { useBaseProgress } from '@/hooks/useBaseProgress';
 import ChatInterface from '@/components/chat/ChatInterface';
 import ProgressBar from '@/components/progress/ProgressBar';
-import WhyCounter from '@/components/progress/WhyCounter';
 import SummaryCard from '@/components/progress/SummaryCard';
 import { baseProgress, messages as messagesApi } from '@/lib/supabase';
 import { downloadConversationPDF } from '@/utils/pdfExport';
@@ -234,8 +233,6 @@ What are you afraid of? What obstacles stand in your way? What fears hold you ba
     );
   }
 
-  // Calculate display depth step (reset for second sequence)
-  const displayWhyLevel = desireComplete ? whyLevel : whyLevel;
   const sequenceLabel = desireComplete ? 'Fears' : 'Desires';
 
   return (
@@ -262,8 +259,7 @@ What are you afraid of? What obstacles stand in your way? What fears hold you ba
           </div>
         )}
         <ProgressBar currentBase="second_base" completedStages={completedStages} />
-        <div className="flex items-center gap-4 mb-4">
-          <WhyCounter currentLevel={displayWhyLevel} />
+        <div className="mb-4">
           <div className="text-sm text-gray-600 font-medium">
             Sequence {whySequence}/2: {sequenceLabel}
           </div>

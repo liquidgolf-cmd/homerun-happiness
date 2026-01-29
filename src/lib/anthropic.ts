@@ -78,9 +78,7 @@ export async function generateCoachResponse(
 Current Stage: ${baseInfo?.label || baseStage} - ${baseInfo?.description || ''}
 ${baseInstruction}
 
-You're at depth ${whyLevel} in the HomeRun framework. Each exchange should go deeper than the last until you reach the root cause or deepest truth.
-
-${whyLevel < 5 ? `Ask the next depth question – make it more specific and deeper than before.` : `You've reached the root – summarize the core insight they've discovered.`}
+Each exchange should go deeper than the last until you reach the root cause or deepest truth. Continue asking deeper questions until the user reveals a genuine root insight, then summarize it.
 
 ${shouldEvaluateCompletion ? `
 IMPORTANT - Completion Suggestion:

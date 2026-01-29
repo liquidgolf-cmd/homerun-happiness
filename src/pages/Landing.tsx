@@ -23,7 +23,7 @@ export default function Landing() {
             </span>
           </h1>
           <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-8">
-            Discover your deepest WHY using AI-powered coaching and The 5 Whys methodology.
+            Discover your deepest WHY using AI-powered coaching and the HomeRun methodology.
             Build a clear path to the life you truly want.
           </p>
         </div>
@@ -56,7 +56,7 @@ export default function Landing() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-loam-green font-bold mt-0.5">✓</span>
-                  <span>The 5 Whys method to find your root motivation</span>
+                  <span>The HomeRun framework to get to your core issues and root motivation</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-loam-green font-bold mt-0.5">✓</span>
@@ -137,8 +137,8 @@ export default function Landing() {
                   desc: 'Get honest, no-BS feedback from an AI coach who pushes you deeper.',
                 },
                 {
-                  title: 'The 5 Whys Method',
-                  desc: 'Ask "why" 5 times to reach your root motivation and truth.',
+                  title: 'The HomeRun Framework',
+                  desc: 'Move through WHY, WHO, WHAT, HOW, and WHY IT MATTERS to reach your core truths.',
                 },
                 {
                   title: 'Vague Answer Detection',

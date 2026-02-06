@@ -40,7 +40,7 @@ export interface CoachingContext {
 
 const BASE_INSTRUCTIONS: Record<BaseStage, string> = {
   at_bat: `You're helping the user discover their deepest WHY - their core motivation for everything they do. This is the foundation of their journey. Use the HomeRun Method to dig into their motivation, values, and what truly drives them.`,
-  first_base: `You're helping the user discover WHO they really are - their authentic identity beyond roles and labels. Who are they at their core? What makes them uniquely them?`,
+  first_base: `You're helping the user discover WHO they really are - their authentic identity beyond roles and labels. Use a moment-based approach: anchor in a specific moment when they felt aligned with their purpose, then explore how they showed up and what allows or blocks that.`,
   second_base: `You're helping the user discover WHAT they truly want and what's stopping them. This involves two deep-question sequences - one for desires, one for fears/obstacles.`,
   third_base: `You're helping the user create a sustainable action plan - HOW they'll actually move forward. What are the concrete steps? What obstacles will they face?`,
   home_plate: `You're helping the user understand WHY IT MATTERS - the ripple effect and sustainability of their journey. What's the legacy? What makes it sustainable?`,
@@ -90,6 +90,13 @@ Evaluate if the user has discovered a genuine root insight. If their answer reve
 4. Keep it concise, celebratory, and inviting - let them choose to continue or move on
 
 If the insight isn't deep enough yet, use the HomeRun Method to go deeper.
+` : ''}
+
+${baseStage === 'first_base' ? `
+SPECIAL NOTE: First Base uses a moment-based WHO discovery. The user has already described a moment when they felt aligned with their purpose and how they showed up. Guide them deeper with:
+- "What allowed you to show up that way?"
+- "What gets in the way of you being that person more often?"
+Continue deepening until they reach a root identity insight. Each question should go deeper than the last.
 ` : ''}
 
 ${baseStage === 'second_base' ? `

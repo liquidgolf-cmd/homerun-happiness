@@ -7,7 +7,7 @@ import { useBaseProgress } from '@/hooks/useBaseProgress';
 import ChatInterface from '@/components/chat/ChatInterface';
 import ProgressBar from '@/components/progress/ProgressBar';
 import SummaryCard from '@/components/progress/SummaryCard';
-import { baseProgress, messages as messagesApi } from '@/lib/supabase';
+import { baseProgress, messages as messagesApi, preAssessments } from '@/lib/supabase';
 import { downloadConversationPDF } from '@/utils/pdfExport';
 import { generateBreakthroughSummary } from '@/lib/anthropic';
 import { ArrowDownTrayIcon, EyeIcon } from '@heroicons/react/24/outline';
@@ -16,9 +16,11 @@ import LogoutLink from '@/components/auth/LogoutLink';
 export default function FirstBase() {
   const { user } = useAuth();
   const { conversation, loading: convLoading, saveRootInsight, saveSummary, updateBase } = useConversation(user?.id);
+  const [preAssessment, setPreAssessment] = useState<{ biggest_challenge: string; why_matters?: string; what_would_change?: string } | null>(null);
   const { messages, loading: chatLoading, loaded: chatLoaded, whyLevel, isComplete, sendMessage, reload } = useChat({
     conversation,
     baseStage: 'first_base',
+    preAssessment: preAssessment || undefined,
   });
   const { completedStages, isStageCompleted } = useBaseProgress(conversation?.id);
   const navigate = useNavigate();
@@ -29,6 +31,25 @@ export default function FirstBase() {
   const [generatingSummary, setGeneratingSummary] = useState(false);
   const [isReviewMode, setIsReviewMode] = useState(false);
   const [allowContinue, setAllowContinue] = useState(false);
+
+  // Fetch pre-assessment for contextual reference (initial question/problem)
+  useEffect(() => {
+    if (user?.id && conversation) {
+      preAssessments.getPreAssessment(user.id)
+        .then(({ data, error }) => {
+          if (!error && data && data.biggest_challenge) {
+            setPreAssessment({
+              biggest_challenge: data.biggest_challenge,
+              why_matters: (data as any).why_matters,
+              what_would_change: (data as any).what_would_change,
+            });
+          }
+        })
+        .catch((err) => {
+          console.warn('Failed to fetch pre-assessment for First Base:', err);
+        });
+    }
+  }, [user?.id, conversation?.id]);
 
   // Check if this stage is completed and should be in review mode
   useEffect(() => {
@@ -47,9 +68,24 @@ export default function FirstBase() {
       setInitialMessageSent(true);
       
       const sendInitialMessage = async () => {
-        const initialMsg = `You've discovered your WHY. Now let's discover WHO you really are.
+        let initialMsg: string;
+        
+        if (conversation.root_why) {
+          const intro = preAssessment?.what_would_change || preAssessment?.biggest_challenge
+            ? `You came in wanting ${preAssessment.what_would_change || preAssessment.biggest_challenge}. `
+            : '';
+          initialMsg = `${intro}Your WHY is ${conversation.root_why}. Now let's get practical.
 
-Here's my question: When you strip away your job title, your roles, and what others expect of you - who are you at your core? What makes you uniquely YOU? Be specific. Don't give me labels or roles.`;
+Think about a specific moment when you felt most aligned with this purpose - a time when you were really living it, even if just for a moment.
+
+In that moment, how were you showing up? What were you doing differently than usual?`;
+        } else {
+          initialMsg = `You've discovered your WHY. Now let's discover WHO you really are.
+
+Think about a specific moment when you felt most aligned with your purpose - a time when you were really living it, even if just for a moment.
+
+In that moment, how were you showing up? What were you doing differently than usual?`;
+        }
 
         await messagesApi.addMessage({
           conversation_id: conversation.id,
@@ -64,7 +100,7 @@ Here's my question: When you strip away your job title, your roles, and what oth
       
       sendInitialMessage();
     }
-  }, [conversation, chatLoaded, messages.length, initialMessageSent, reload]);
+  }, [conversation, chatLoaded, messages.length, initialMessageSent, reload, preAssessment]);
 
   useEffect(() => {
     if ((isComplete || whyLevel >= 5) && conversation && !showCompletion) {

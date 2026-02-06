@@ -27,6 +27,7 @@ export default function FirstBase() {
   const [showCompletion, setShowCompletion] = useState(false);
   const [proceeding, setProceeding] = useState(false);
   const [initialMessageSent, setInitialMessageSent] = useState(false);
+  const [migrationChecked, setMigrationChecked] = useState(false);
   const [summary, setSummary] = useState<string | null>(null);
   const [generatingSummary, setGeneratingSummary] = useState(false);
   const [isReviewMode, setIsReviewMode] = useState(false);
@@ -61,6 +62,56 @@ export default function FirstBase() {
       setIsReviewMode(stageCompleted || isPastStage);
     }
   }, [conversation, isStageCompleted]);
+
+  // Migration: Replace old First Base opening with new contextual message (for existing conversations)
+  useEffect(() => {
+    if (!conversation || !chatLoaded || messages.length === 0 || migrationChecked) return;
+
+    const firstAssistantMsg = messages.find(m => m.role === 'assistant');
+    if (!firstAssistantMsg) return;
+
+    const oldFormatMarkers = [
+      'When you strip away your job title, your roles',
+      'who are you at your core? What makes you uniquely YOU',
+    ];
+    const isOldFormat = oldFormatMarkers.some(marker =>
+      firstAssistantMsg.content.includes(marker)
+    );
+
+    if (!isOldFormat) {
+      setMigrationChecked(true);
+      return;
+    }
+
+    setMigrationChecked(true);
+
+    const runMigration = async () => {
+      let newMsg: string;
+      if (conversation.root_why) {
+        const intro = preAssessment?.what_would_change || preAssessment?.biggest_challenge
+          ? `You came in wanting ${preAssessment.what_would_change || preAssessment.biggest_challenge}. `
+          : '';
+        newMsg = `${intro}Your WHY is ${conversation.root_why}. Now let's get practical.
+
+Think about a specific moment when you felt most aligned with this purpose - a time when you were really living it, even if just for a moment.
+
+In that moment, how were you showing up? What were you doing differently than usual?`;
+      } else {
+        newMsg = `You've discovered your WHY. Now let's discover WHO you really are.
+
+Think about a specific moment when you felt most aligned with your purpose - a time when you were really living it, even if just for a moment.
+
+In that moment, how were you showing up? What were you doing differently than usual?`;
+      }
+
+      const { error } = await messagesApi.updateMessage(firstAssistantMsg.id, { content: newMsg });
+      if (!error) {
+        reload();
+      }
+    };
+
+    runMigration();
+  }, [conversation, chatLoaded, messages, migrationChecked, preAssessment, reload]);
 
   // Send initial message when conversation starts (only if no existing messages)
   useEffect(() => {

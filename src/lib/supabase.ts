@@ -152,6 +152,16 @@ export const messages = {
 
     return { data, error };
   },
+
+  async updateMessage(messageId: string, updates: { content: string }) {
+    const { data, error } = await supabase
+      .from('messages')
+      .update(updates)
+      .eq('id', messageId)
+      .select()
+      .single();
+    return { data, error };
+  },
 };
 
 // Base progress helpers

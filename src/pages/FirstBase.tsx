@@ -70,12 +70,17 @@ export default function FirstBase() {
     const firstAssistantMsg = messages.find(m => m.role === 'assistant');
     if (!firstAssistantMsg) return;
 
+    const contentLower = firstAssistantMsg.content.toLowerCase();
     const oldFormatMarkers = [
-      'When you strip away your job title, your roles',
-      'who are you at your core? What makes you uniquely YOU',
+      'you\'ve discovered your why. now let\'s discover who you really are',
+      'discover who you really are',
+      'when you strip away your job title, your roles',
+      'who are you at your core',
+      'strip away all the labels',
+      'what makes you uniquely you',
     ];
     const isOldFormat = oldFormatMarkers.some(marker =>
-      firstAssistantMsg.content.includes(marker)
+      contentLower.includes(marker)
     );
 
     if (!isOldFormat) {
@@ -105,7 +110,9 @@ In that moment, how were you showing up? What were you doing differently than us
       }
 
       const { error } = await messagesApi.updateMessage(firstAssistantMsg.id, { content: newMsg });
-      if (!error) {
+      if (error) {
+        console.warn('First Base migration: update failed. Ensure the SQL migration has been run in Supabase (UPDATE policy on messages).', error);
+      } else {
         reload();
       }
     };

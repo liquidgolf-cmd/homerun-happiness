@@ -2,6 +2,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Conversation, Message, BaseProgress, BaseStage, JourneyType } from '@/types/conversation';
 import { PreAssessment } from '@/types/user';
 import { HOMERUN_PRE_ASSESSMENT_KEY } from '@/utils/constants';
+import { generateFocusStatement } from '@/lib/anthropic';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -244,6 +245,12 @@ export const preAssessments = {
         return { success: false };
       }
 
+      const biggestChallenge = payload.biggestChallenge || '';
+      const focusStatement =
+        biggestChallenge.length <= 100
+          ? biggestChallenge
+          : await generateFocusStatement(biggestChallenge);
+
       // Map to DB shape
       const assessment = {
         user_id: userId,
@@ -251,7 +258,8 @@ export const preAssessments = {
         happiness_score: payload.happinessScore,
         clarity_score: payload.clarityScore,
         readiness_score: payload.readinessScore,
-        biggest_challenge: payload.biggestChallenge || '',
+        biggest_challenge: biggestChallenge,
+        focus_statement: focusStatement,
         recommended_path: payload.recommendedPath || 'personal',
       };
 

@@ -245,14 +245,14 @@ export async function generateFocusStatement(rawChallenge: string): Promise<stri
   if (!anthropic) {
     return rawChallenge.length > 120 ? `${rawChallenge.slice(0, 120).trim()}…` : rawChallenge;
   }
-  const systemPrompt = `You are a life coach. Your task is to turn the user's description of their biggest challenge into one or two short, clear, actionable sentences.
+  const systemPrompt = `Condense the user's challenge to 1–2 sentences for display as a focus statement.
 
 Rules:
 - Keep it to 1-2 sentences only. No more.
-- Use first person ("I want to...", "I'm working on...") or a clear, direct statement of what they're working on.
-- Strip rambling, repetition, and tangents. Capture the core goal or pain point.
-- Do not add advice or questions. Output only the summarized focus statement.
-- If the input is already 1-2 clear sentences, you may return it lightly edited or as-is.`;
+- Use their exact words where possible. Do NOT interpret, infer, or replace their phrasing with synonyms.
+- If the input is already 1-2 clear sentences, return it as-is or with minimal editing.
+- Strip rambling, repetition, and tangents only—preserve their core meaning and tone.
+- Do not add advice or questions. Output only the condensed focus statement.`;
 
   const userContent = `User's description of their biggest challenge:\n\n${rawChallenge}\n\nWrite the 1-2 sentence focus statement now. No preamble.`;
 

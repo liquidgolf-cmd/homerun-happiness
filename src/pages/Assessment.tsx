@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { MicrophoneIcon, StopIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/hooks/useAuth';
 import { useDictation } from '@/hooks/useDictation';
-import { generatePreAssessmentSnapshot } from '@/lib/anthropic';
+import { generateFocusStatement, generatePreAssessmentSnapshot } from '@/lib/anthropic';
 import { preAssessments } from '@/lib/supabase';
 import { CONVERSION_COPY, HOMERUN_PRE_ASSESSMENT_KEY } from '@/utils/constants';
 import { getRedirectPath } from '@/utils/routing';
@@ -130,6 +130,10 @@ export default function Assessment() {
     
     try {
       if (user?.id) {
+        const focusStatement =
+          biggestChallenge.length <= 100
+            ? biggestChallenge
+            : await generateFocusStatement(biggestChallenge);
         await preAssessments.createPreAssessment({
           user_id: user.id,
           email: user.email || '',
@@ -137,6 +141,7 @@ export default function Assessment() {
           clarity_score: clarityScore,
           readiness_score: readinessScore,
           biggest_challenge: biggestChallenge,
+          focus_statement: focusStatement,
           recommended_path: recommendedPath,
         });
         // Clear sessionStorage since we've saved to DB

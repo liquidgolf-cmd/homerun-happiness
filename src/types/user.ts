@@ -14,6 +14,7 @@ export interface PreAssessment {
   clarity_score?: number;
   readiness_score?: number;
   biggest_challenge?: string;
+  focus_statement?: string;
   recommended_path?: 'business' | 'personal';
   created_at: string;
 }

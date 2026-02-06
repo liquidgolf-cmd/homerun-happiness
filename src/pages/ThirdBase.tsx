@@ -8,6 +8,7 @@ import ChatInterface from '@/components/chat/ChatInterface';
 import ProgressBar from '@/components/progress/ProgressBar';
 import SummaryCard from '@/components/progress/SummaryCard';
 import { baseProgress, messages as messagesApi } from '@/lib/supabase';
+import { usePreAssessment } from '@/hooks/usePreAssessment';
 import { downloadConversationPDF } from '@/utils/pdfExport';
 import { generateBreakthroughSummary } from '@/lib/anthropic';
 import { ArrowDownTrayIcon, EyeIcon } from '@heroicons/react/24/outline';
@@ -16,6 +17,7 @@ import LogoutLink from '@/components/auth/LogoutLink';
 export default function ThirdBase() {
   const { user } = useAuth();
   const { conversation, loading: convLoading, saveRootInsight, saveSummary, updateBase } = useConversation(user?.id);
+  const preAssessment = usePreAssessment(user?.id);
   const { messages, loading: chatLoading, loaded: chatLoaded, whyLevel, isComplete, sendMessage, reload } = useChat({
     conversation,
     baseStage: 'third_base',
@@ -210,6 +212,7 @@ ${whyText ? `${whyText}\n\n` : ''}${whoText ? `${whoText}\n\n` : ''}${whatText ?
             onSendMessage={sendMessage}
             disabled={isReviewMode && !allowContinue}
             disabledMessage="This conversation is complete. Click 'Continue Conversation' to add more messages."
+            focusStatement={preAssessment?.focusStatement ?? preAssessment?.biggest_challenge ?? undefined}
           />
         </div>
 

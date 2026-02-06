@@ -237,6 +237,43 @@ Write the summary now. Do not include any meta-commentary or instructions - just
   }
 }
 
+/**
+ * Turn the user's (possibly long) challenge description into a 1-2 sentence actionable focus statement
+ * for display in the conversation header.
+ */
+export async function generateFocusStatement(rawChallenge: string): Promise<string> {
+  if (!anthropic) {
+    return rawChallenge.length > 120 ? `${rawChallenge.slice(0, 120).trim()}…` : rawChallenge;
+  }
+  const systemPrompt = `You are a life coach. Your task is to turn the user's description of their biggest challenge into one or two short, clear, actionable sentences.
+
+Rules:
+- Keep it to 1-2 sentences only. No more.
+- Use first person ("I want to...", "I'm working on...") or a clear, direct statement of what they're working on.
+- Strip rambling, repetition, and tangents. Capture the core goal or pain point.
+- Do not add advice or questions. Output only the summarized focus statement.
+- If the input is already 1-2 clear sentences, you may return it lightly edited or as-is.`;
+
+  const userContent = `User's description of their biggest challenge:\n\n${rawChallenge}\n\nWrite the 1-2 sentence focus statement now. No preamble.`;
+
+  try {
+    const response = await anthropic.messages.create({
+      model,
+      max_tokens: 150,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userContent }],
+    });
+    const content = response.content[0];
+    if (content.type !== 'text') {
+      return rawChallenge.length > 120 ? `${rawChallenge.slice(0, 120).trim()}…` : rawChallenge;
+    }
+    return content.text.trim() || rawChallenge;
+  } catch (error) {
+    console.warn('Focus statement generation failed, using raw text:', error);
+    return rawChallenge.length > 120 ? `${rawChallenge.slice(0, 120).trim()}…` : rawChallenge;
+  }
+}
+
 export interface PreAssessmentSnapshotParams {
   happinessScore: number;
   clarityScore: number;
@@ -292,5 +329,94 @@ Write the HomeRun Snapshot now.`;
   } catch (error) {
     console.error('Error generating pre-assessment snapshot:', error);
     throw error;
+  }
+}
+
+export interface ReportConclusionParams {
+  focusStatement: string;
+  atBatSummary?: string;
+  firstBaseSummary?: string;
+  secondBaseSummary?: string;
+  thirdBaseSummary?: string;
+  homePlateSummary?: string;
+  rootWhy?: string;
+  rootIdentity?: string;
+  rootDesire?: string;
+  rootFear?: string;
+  rootObstacle?: string;
+  rootLegacy?: string;
+}
+
+export interface ReportConclusion {
+  /** Short paragraph restating the problem and tying it to the journey */
+  restatement: string;
+  /** Paragraph synthesizing WHY, WHO, WHAT, HOW, and why it MATTERS */
+  synthesis: string;
+  /** Actionable plan: 3–5 concrete next steps */
+  plan: string;
+  /** Closing paragraph summarizing the whole process and their transformation */
+  overallSummary: string;
+}
+
+/**
+ * Generate the concluding section of the final report: restate problem, synthesize modules,
+ * provide a plan, and an overall summary of the journey.
+ */
+export async function generateReportConclusion(params: ReportConclusionParams): Promise<ReportConclusion | null> {
+  if (!anthropic) return null;
+
+  const systemPrompt = `You are a life coach writing the concluding section of a client's HomeRun journey report.
+
+You will receive:
+1. The client's original focus (what they set out to work on)
+2. Their breakthrough summaries and root insights from each base (At Bat = WHY, First Base = WHO, Second Base = WHAT, Third Base = HOW, Home Plate = why it MATTERS)
+
+Your task is to output four distinct sections in the following format. Use the exact labels and separate each section with "---SECTION---".
+
+1. RESTATEMENT (2-4 sentences)
+Restate the client's original problem or focus in clear, compassionate language. Connect it to the journey they just completed.
+
+2. SYNTHESIS (one short paragraph, 3-5 sentences)
+Synthesize what they discovered across the modules: how their WHY fuels their WHO, how their WHO informs what they want (WHAT), how their HOW gets them there, and why it MATTERS. Tie it into one coherent narrative.
+
+3. PLAN (3-5 bullet points or short numbered steps)
+Give them a concrete, actionable plan. Each item should be a clear next step they can take. Use their actual insights (WHY, WHO, WHAT, HOW, legacy) so the plan feels personal. Format as short lines, e.g. "• Step one..." or "1. ..."
+
+4. OVERALL SUMMARY (one short paragraph, 2-4 sentences)
+Close with an overall summary of the whole process: what they did, what they discovered, and what they can carry forward. Warm and encouraging.`;
+
+  const parts: string[] = [
+    `Original focus: ${params.focusStatement}`,
+    params.rootWhy ? `Root WHY (At Bat): ${params.rootWhy}` : '',
+    params.atBatSummary ? `At Bat breakthrough summary: ${params.atBatSummary}` : '',
+    params.rootIdentity ? `Root WHO (First Base): ${params.rootIdentity}` : '',
+    params.firstBaseSummary ? `First Base breakthrough summary: ${params.firstBaseSummary}` : '',
+    params.rootDesire ? `Root WHAT - desire (Second Base): ${params.rootDesire}` : '',
+    params.rootFear ? `Root WHAT - fear (Second Base): ${params.rootFear}` : '',
+    params.secondBaseSummary ? `Second Base breakthrough summary: ${params.secondBaseSummary}` : '',
+    params.rootObstacle ? `Root HOW (Third Base): ${params.rootObstacle}` : '',
+    params.thirdBaseSummary ? `Third Base breakthrough summary: ${params.thirdBaseSummary}` : '',
+    params.rootLegacy ? `Root legacy (Home Plate): ${params.rootLegacy}` : '',
+    params.homePlateSummary ? `Home Plate breakthrough summary: ${params.homePlateSummary}` : '',
+  ].filter(Boolean);
+
+  const userContent = `Client's journey data:\n\n${parts.join('\n\n')}\n\nWrite the four sections now. Use "---SECTION---" between each section.`;
+
+  try {
+    const response = await anthropic.messages.create({
+      model,
+      max_tokens: 1500,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userContent }],
+    });
+    const content = response.content[0];
+    if (content.type !== 'text') return null;
+    const text = content.text.trim();
+    const sections = text.split('---SECTION---').map((s) => s.trim()).filter(Boolean);
+    const [restatement = '', synthesis = '', plan = '', overallSummary = ''] = sections;
+    return { restatement, synthesis, plan, overallSummary };
+  } catch (error) {
+    console.warn('Report conclusion generation failed:', error);
+    return null;
   }
 }

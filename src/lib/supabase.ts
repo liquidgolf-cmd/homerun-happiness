@@ -159,7 +159,7 @@ export const messages = {
       .update(updates)
       .eq('id', messageId)
       .select()
-      .single();
+      .maybeSingle();
     return { data, error };
   },
 };

@@ -2,18 +2,23 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useConversation } from '@/hooks/useConversation';
+import { usePreAssessment } from '@/hooks/usePreAssessment';
 import LogoutLink from '@/components/auth/LogoutLink';
 import { messages as messagesApi } from '@/lib/supabase';
 import { downloadFullJourneyPDF } from '@/utils/pdfExport';
+import { generateReportConclusion, type ReportConclusion } from '@/lib/anthropic';
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { Message } from '@/types/conversation';
 
 export default function Report() {
   const { user } = useAuth();
   const { conversation, loading } = useConversation(user?.id);
+  const preAssessment = usePreAssessment(user?.id);
   const navigate = useNavigate();
   const [allMessages, setAllMessages] = useState<Message[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
+  const [conclusion, setConclusion] = useState<ReportConclusion | null>(null);
+  const [loadingConclusion, setLoadingConclusion] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -27,6 +32,31 @@ export default function Report() {
     }
   }, [conversation]);
 
+  useEffect(() => {
+    const focus = preAssessment?.focusStatement ?? preAssessment?.biggest_challenge;
+    if (!conversation || !focus) return;
+    setLoadingConclusion(true);
+    generateReportConclusion({
+      focusStatement: focus,
+      rootWhy: conversation.root_why,
+      rootIdentity: conversation.root_identity,
+      rootDesire: conversation.root_desire,
+      rootFear: conversation.root_fear,
+      rootObstacle: conversation.root_obstacle,
+      rootLegacy: conversation.root_legacy,
+      atBatSummary: conversation.at_bat_summary,
+      firstBaseSummary: conversation.first_base_summary,
+      secondBaseSummary: conversation.second_base_summary,
+      thirdBaseSummary: conversation.third_base_summary,
+      homePlateSummary: conversation.home_plate_summary,
+    })
+      .then((result) => {
+        setConclusion(result ?? null);
+      })
+      .catch(() => setConclusion(null))
+      .finally(() => setLoadingConclusion(false));
+  }, [conversation, preAssessment?.focusStatement, preAssessment?.biggest_challenge]);
+
   const loadAllMessages = async () => {
     if (!conversation) return;
     
@@ -37,6 +67,8 @@ export default function Report() {
     }
     setLoadingMessages(false);
   };
+
+  const focusStatement = preAssessment?.focusStatement ?? preAssessment?.biggest_challenge;
 
   const handleDownloadJourney = () => {
     if (conversation && allMessages.length > 0) {
@@ -78,12 +110,164 @@ export default function Report() {
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-2">Your Insights Report</h1>
             <p className="text-gray-600">
-              Here's what you've discovered on your journey
+              Here&apos;s what you&apos;ve discovered on your journey
             </p>
           </div>
         </div>
 
         <div className="space-y-6">
+          {/* 1. Original focus – what they set out to work on */}
+          {focusStatement && (
+            <div className="bg-white rounded-loam shadow-md p-6 border-l-4 border-loam-brown">
+              <h2 className="text-lg font-semibold text-gray-500 uppercase tracking-wide mb-2">What you set out to work on</h2>
+              <p className="text-xl text-gray-900 font-medium">{focusStatement}</p>
+            </div>
+          )}
+
+          {/* 2. Discovery modules – summaries in order */}
+          <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-2">Your discoveries</h2>
+          <p className="text-gray-600 mb-4">A summary of what you uncovered at each stage of your HomeRun journey.</p>
+
+          {/* At Bat – WHY */}
+          {(conversation.root_why || conversation.at_bat_summary) && (
+            <div className="bg-white rounded-loam shadow-md p-6 border-l-4 border-loam-brown">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">🏠</span>
+                <h3 className="text-xl font-bold text-gray-900">At Bat – Your WHY</h3>
+              </div>
+              {conversation.at_bat_summary ? (
+                <p className="text-gray-700 whitespace-pre-wrap">{conversation.at_bat_summary}</p>
+              ) : (
+                <p className="text-gray-700 whitespace-pre-wrap">{conversation.root_why}</p>
+              )}
+              {conversation.at_bat_summary && conversation.root_why && (
+                <p className="text-gray-600 text-sm mt-3 italic">Root insight: {conversation.root_why}</p>
+              )}
+            </div>
+          )}
+
+          {/* First Base – WHO */}
+          {(conversation.root_identity || conversation.first_base_summary) && (
+            <div className="bg-white rounded-loam shadow-md p-6 border-l-4 border-loam-green">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">👤</span>
+                <h3 className="text-xl font-bold text-gray-900">First Base – Your WHO</h3>
+              </div>
+              {conversation.first_base_summary ? (
+                <p className="text-gray-700 whitespace-pre-wrap">{conversation.first_base_summary}</p>
+              ) : (
+                <p className="text-gray-700 whitespace-pre-wrap">{conversation.root_identity}</p>
+              )}
+              {conversation.first_base_summary && conversation.root_identity && (
+                <p className="text-gray-600 text-sm mt-3 italic">Root insight: {conversation.root_identity}</p>
+              )}
+            </div>
+          )}
+
+          {/* Second Base – WHAT */}
+          {(conversation.root_desire || conversation.root_fear || conversation.second_base_summary) && (
+            <div className="bg-white rounded-loam shadow-md p-6 border-l-4 border-yellow-500">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">💫</span>
+                <h3 className="text-xl font-bold text-gray-900">Second Base – Your WHAT</h3>
+              </div>
+              {conversation.second_base_summary ? (
+                <p className="text-gray-700 whitespace-pre-wrap">{conversation.second_base_summary}</p>
+              ) : (
+                <>
+                  {conversation.root_desire && <p className="text-gray-700 whitespace-pre-wrap"><strong>Desires:</strong> {conversation.root_desire}</p>}
+                  {conversation.root_fear && <p className="text-gray-700 whitespace-pre-wrap mt-2"><strong>Fears & obstacles:</strong> {conversation.root_fear}</p>}
+                </>
+              )}
+              {(conversation.root_desire || conversation.root_fear) && conversation.second_base_summary && (
+                <p className="text-gray-600 text-sm mt-3 italic">
+                  Root insights: {[conversation.root_desire, conversation.root_fear].filter(Boolean).join(' • ')}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Third Base – HOW */}
+          {(conversation.root_obstacle || conversation.third_base_summary) && (
+            <div className="bg-white rounded-loam shadow-md p-6 border-l-4 border-loam-clay">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">🛤️</span>
+                <h3 className="text-xl font-bold text-gray-900">Third Base – Your HOW</h3>
+              </div>
+              {conversation.third_base_summary ? (
+                <p className="text-gray-700 whitespace-pre-wrap">{conversation.third_base_summary}</p>
+              ) : (
+                <p className="text-gray-700 whitespace-pre-wrap">{conversation.root_obstacle}</p>
+              )}
+              {conversation.third_base_summary && conversation.root_obstacle && (
+                <p className="text-gray-600 text-sm mt-3 italic">Root insight: {conversation.root_obstacle}</p>
+              )}
+            </div>
+          )}
+
+          {/* Home Plate – Why it MATTERS */}
+          {(conversation.root_legacy || conversation.root_sustainability_threat || conversation.home_plate_summary) && (
+            <div className="bg-white rounded-loam shadow-md p-6 border-l-4 border-loam-base">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">🌟</span>
+                <h3 className="text-xl font-bold text-gray-900">Home Plate – Why it MATTERS</h3>
+              </div>
+              {conversation.home_plate_summary ? (
+                <p className="text-gray-700 whitespace-pre-wrap">{conversation.home_plate_summary}</p>
+              ) : (
+                <>
+                  {conversation.root_legacy && <p className="text-gray-700 whitespace-pre-wrap">{conversation.root_legacy}</p>}
+                  {conversation.root_sustainability_threat && <p className="text-gray-700 whitespace-pre-wrap mt-2"><strong>Sustainability:</strong> {conversation.root_sustainability_threat}</p>}
+                </>
+              )}
+              {conversation.home_plate_summary && (conversation.root_legacy || conversation.root_sustainability_threat) && (
+                <p className="text-gray-600 text-sm mt-3 italic">
+                  Root insights: {[conversation.root_legacy, conversation.root_sustainability_threat].filter(Boolean).join(' • ')}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* 3. Concluding section – restate problem, synthesis, plan, overall summary */}
+          <div className="bg-white rounded-loam shadow-md p-6 border-2 border-loam-brown mt-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Conclusion – Your path forward</h2>
+            {loadingConclusion ? (
+              <div className="flex items-center gap-3 text-gray-500 py-6">
+                <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-loam-brown border-t-transparent" />
+                <span>Creating your personalized conclusion…</span>
+              </div>
+            ) : conclusion ? (
+              <div className="space-y-6">
+                {conclusion.restatement && (
+                  <section>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Restating your focus</h3>
+                    <p className="text-gray-700 whitespace-pre-wrap">{conclusion.restatement}</p>
+                  </section>
+                )}
+                {conclusion.synthesis && (
+                  <section>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">How it all connects</h3>
+                    <p className="text-gray-700 whitespace-pre-wrap">{conclusion.synthesis}</p>
+                  </section>
+                )}
+                {conclusion.plan && (
+                  <section>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Your plan</h3>
+                    <div className="text-gray-700 whitespace-pre-wrap">{conclusion.plan}</div>
+                  </section>
+                )}
+                {conclusion.overallSummary && (
+                  <section>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Overall summary</h3>
+                    <p className="text-gray-700 whitespace-pre-wrap">{conclusion.overallSummary}</p>
+                  </section>
+                )}
+              </div>
+            ) : (
+              <p className="text-gray-500 italic">Complete more of your journey to generate a personalized conclusion.</p>
+            )}
+          </div>
+
           {/* Journey Progress Visual */}
           <div className="bg-white rounded-loam shadow-md p-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">Your HomeRun Journey</h2>
@@ -114,120 +298,6 @@ export default function Report() {
               </div>
             </div>
           </div>
-
-          {/* Root WHY */}
-          {conversation.root_why && (
-            <div className="bg-white rounded-loam shadow-md p-6 border-l-4 border-loam-brown">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-2xl">🏠</span>
-                <h2 className="text-2xl font-bold text-gray-900">Your WHY</h2>
-                <span className="text-sm text-gray-500">(At Bat)</span>
-              </div>
-              <p className="text-gray-700 whitespace-pre-wrap">{conversation.root_why}</p>
-              {conversation.at_bat_summary && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Breakthrough Summary</h3>
-                  <p className="text-gray-700 whitespace-pre-wrap italic">{conversation.at_bat_summary}</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Root Identity */}
-          {conversation.root_identity && (
-            <div className="bg-white rounded-loam shadow-md p-6 border-l-4 border-loam-green">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-2xl">👤</span>
-                <h2 className="text-2xl font-bold text-gray-900">Your WHO</h2>
-                <span className="text-sm text-gray-500">(First Base)</span>
-              </div>
-              <p className="text-gray-700 whitespace-pre-wrap">{conversation.root_identity}</p>
-              {conversation.first_base_summary && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Breakthrough Summary</h3>
-                  <p className="text-gray-700 whitespace-pre-wrap italic">{conversation.first_base_summary}</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Root Desire */}
-          {conversation.root_desire && (
-            <div className="bg-white rounded-loam shadow-md p-6 border-l-4 border-yellow-500">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-2xl">💫</span>
-                <h2 className="text-2xl font-bold text-gray-900">Your WHAT - Desires</h2>
-                <span className="text-sm text-gray-500">(Second Base)</span>
-              </div>
-              <p className="text-gray-700 whitespace-pre-wrap">{conversation.root_desire}</p>
-              {conversation.second_base_summary && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Breakthrough Summary</h3>
-                  <p className="text-gray-700 whitespace-pre-wrap italic">{conversation.second_base_summary}</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Root Fear */}
-          {conversation.root_fear && (
-            <div className="bg-white rounded-loam shadow-md p-6 border-l-4 border-red-500">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-2xl">⚠️</span>
-                <h2 className="text-2xl font-bold text-gray-900">Your WHAT - Fears & Obstacles</h2>
-                <span className="text-sm text-gray-500">(Second Base)</span>
-              </div>
-              <p className="text-gray-700 whitespace-pre-wrap">{conversation.root_fear}</p>
-            </div>
-          )}
-
-          {/* Root Obstacle */}
-          {conversation.root_obstacle && (
-            <div className="bg-white rounded-loam shadow-md p-6 border-l-4 border-loam-clay">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-2xl">🛤️</span>
-                <h2 className="text-2xl font-bold text-gray-900">Your HOW</h2>
-                <span className="text-sm text-gray-500">(Third Base)</span>
-              </div>
-              <p className="text-gray-700 whitespace-pre-wrap">{conversation.root_obstacle}</p>
-              {conversation.third_base_summary && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Breakthrough Summary</h3>
-                  <p className="text-gray-700 whitespace-pre-wrap italic">{conversation.third_base_summary}</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Root Legacy */}
-          {conversation.root_legacy && (
-            <div className="bg-white rounded-loam shadow-md p-6 border-l-4 border-loam-base">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-2xl">🌟</span>
-                <h2 className="text-2xl font-bold text-gray-900">Your Legacy</h2>
-                <span className="text-sm text-gray-500">(Home Plate)</span>
-              </div>
-              <p className="text-gray-700 whitespace-pre-wrap">{conversation.root_legacy}</p>
-              {conversation.home_plate_summary && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Breakthrough Summary</h3>
-                  <p className="text-gray-700 whitespace-pre-wrap italic">{conversation.home_plate_summary}</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Root Sustainability */}
-          {conversation.root_sustainability_threat && (
-            <div className="bg-white rounded-loam shadow-md p-6 border-l-4 border-loam-highlight">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-2xl">♻️</span>
-                <h2 className="text-2xl font-bold text-gray-900">Sustainability & Long-term Impact</h2>
-                <span className="text-sm text-gray-500">(Home Plate)</span>
-              </div>
-              <p className="text-gray-700 whitespace-pre-wrap">{conversation.root_sustainability_threat}</p>
-            </div>
-          )}
 
           {/* Journey Info */}
           <div className="bg-white rounded-loam shadow-md p-6">

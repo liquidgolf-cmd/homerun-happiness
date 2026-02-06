@@ -7,7 +7,8 @@ import { useBaseProgress } from '@/hooks/useBaseProgress';
 import ChatInterface from '@/components/chat/ChatInterface';
 import ProgressBar from '@/components/progress/ProgressBar';
 import SummaryCard from '@/components/progress/SummaryCard';
-import { baseProgress, messages as messagesApi, preAssessments } from '@/lib/supabase';
+import { baseProgress, messages as messagesApi } from '@/lib/supabase';
+import { usePreAssessment } from '@/hooks/usePreAssessment';
 import { downloadConversationPDF } from '@/utils/pdfExport';
 import { generateBreakthroughSummary } from '@/lib/anthropic';
 import { ArrowDownTrayIcon, EyeIcon } from '@heroicons/react/24/outline';
@@ -16,7 +17,7 @@ import LogoutLink from '@/components/auth/LogoutLink';
 export default function FirstBase() {
   const { user } = useAuth();
   const { conversation, loading: convLoading, saveRootInsight, saveSummary, updateBase } = useConversation(user?.id);
-  const [preAssessment, setPreAssessment] = useState<{ biggest_challenge: string; why_matters?: string; what_would_change?: string } | null>(null);
+  const preAssessment = usePreAssessment(user?.id);
   const { messages, loading: chatLoading, loaded: chatLoaded, whyLevel, isComplete, sendMessage, reload } = useChat({
     conversation,
     baseStage: 'first_base',
@@ -32,25 +33,6 @@ export default function FirstBase() {
   const [generatingSummary, setGeneratingSummary] = useState(false);
   const [isReviewMode, setIsReviewMode] = useState(false);
   const [allowContinue, setAllowContinue] = useState(false);
-
-  // Fetch pre-assessment for contextual reference (initial question/problem)
-  useEffect(() => {
-    if (user?.id && conversation) {
-      preAssessments.getPreAssessment(user.id)
-        .then(({ data, error }) => {
-          if (!error && data && data.biggest_challenge) {
-            setPreAssessment({
-              biggest_challenge: data.biggest_challenge,
-              why_matters: (data as any).why_matters,
-              what_would_change: (data as any).what_would_change,
-            });
-          }
-        })
-        .catch((err) => {
-          console.warn('Failed to fetch pre-assessment for First Base:', err);
-        });
-    }
-  }, [user?.id, conversation?.id]);
 
   // Check if this stage is completed and should be in review mode
   useEffect(() => {
@@ -109,9 +91,9 @@ Think about a specific moment when you felt most aligned with your purpose - a t
 In that moment, how were you showing up? What were you doing differently than usual?`;
       }
 
-      const { error } = await messagesApi.updateMessage(firstAssistantMsg.id, { content: newMsg });
-      if (error) {
-        console.warn('First Base migration: update failed. Ensure the SQL migration has been run in Supabase (UPDATE policy on messages).', error);
+      const { data, error } = await messagesApi.updateMessage(firstAssistantMsg.id, { content: newMsg });
+      if (error || !data) {
+        console.warn('First Base migration: update failed (0 rows affected). Run the SQL migration in Supabase: database-migration-messages-update-policy.sql', error || new Error('No rows updated'));
       } else {
         reload();
       }
@@ -300,6 +282,7 @@ In that moment, how were you showing up? What were you doing differently than us
             onSendMessage={sendMessage}
             disabled={isReviewMode && !allowContinue}
             disabledMessage="This conversation is complete. Click 'Continue Conversation' to add more messages."
+            focusStatement={preAssessment?.focusStatement ?? preAssessment?.biggest_challenge ?? undefined}
           />
         </div>
 

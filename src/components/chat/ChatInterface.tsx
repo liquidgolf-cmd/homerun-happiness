@@ -12,9 +12,11 @@ interface ChatInterfaceProps {
   onSendMessage: (content: string) => void;
   disabled?: boolean;
   disabledMessage?: string;
+  /** Shown below the Conversation header so the user can reference what they're working on */
+  focusStatement?: string | null;
 }
 
-export default function ChatInterface({ messages, loading, onSendMessage, disabled = false, disabledMessage }: ChatInterfaceProps) {
+export default function ChatInterface({ messages, loading, onSendMessage, disabled = false, disabledMessage, focusStatement }: ChatInterfaceProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { speakText, ttsEnabled } = useTTS();
   const lastMessageRef = useRef<string>('');
@@ -82,6 +84,14 @@ export default function ChatInterface({ messages, loading, onSendMessage, disabl
         <h3 className="text-white font-semibold">Conversation</h3>
         <TTSToggle />
       </div>
+
+      {/* What you're working on - reference for the user */}
+      {focusStatement && focusStatement.trim() && (
+        <div className="px-4 py-2 bg-loam-neutral/50 border-b border-loam-brown/20">
+          <p className="text-xs font-medium text-loam-charcoal/70 uppercase tracking-wide">What you&apos;re working on</p>
+          <p className="text-sm text-loam-charcoal line-clamp-2">{focusStatement.length > 120 ? `${focusStatement.slice(0, 120).trim()}…` : focusStatement}</p>
+        </div>
+      )}
 
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {messages.length === 0 && (
